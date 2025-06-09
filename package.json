@@ -34,7 +34,8 @@
     ],
     "nodes": [
       "dist/nodes/ReachinboxNode/Reachinbox.node.js",
-      "dist/nodes/ReachinboxNode/ReachinboxAction.node.js"
+      "dist/nodes/ReachinboxNode/ReachinboxAction.node.js",
+      "dist/nodes/ReachinboxNode/ReachinboxTrigger.node.js"
     ]
   },
   "devDependencies": {

@@ -35,114 +35,214 @@ import {
           type: 'options',
           options: [
             {
-              name: 'Add Lead',
+              name: 'Add Leads',
               value: 'add',
-              description: 'Add a new lead',
+              description: 'Add multiple leads to a campaign',
             },
             {
               name: 'Update Lead',
               value: 'update',
-              description: 'Update an existing lead',
+              description: 'Update a specific lead’s data',
             },
             {
-              name: 'Delete Lead',
+              name: 'Delete Leads',
               value: 'delete',
-              description: 'Delete an existing lead',
+              description: 'Delete one or more leads from a campaign',
             },
           ],
           default: 'add',
-          description: 'Action to perform',
+          description: 'Action to perform in ReachInbox',
         },
+      
+        // ✅ Shared across all
+        {
+          displayName: 'Campaign ID',
+          name: 'campaignId',
+          type: 'string',
+          required: true,
+          default: '',
+        },
+      
+        // ✅ For Add
+        {
+          displayName: 'Leads (JSON)',
+          name: 'leads',
+          type: 'json',
+          displayOptions: {
+            show: {
+              operation: ['add'],
+            },
+          },
+          default: '',
+          description: 'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}]',
+        },
+        {
+          displayName: 'New Core Variables (Array)',
+          name: 'newCoreVariables',
+          type: 'json',
+          displayOptions: {
+            show: {
+              operation: ['add'],
+            },
+          },
+          default: '',
+          description: 'Array of new variables like ["firstName", "lastName"]',
+        },
+      
+        // ✅ For Update
         {
           displayName: 'Lead ID',
           name: 'leadId',
           type: 'string',
-          required: false,
           displayOptions: {
             show: {
-              operation: ['update', 'delete'],
+              operation: ['update'],
             },
           },
           default: '',
-          description: 'ID of the lead to update or delete',
         },
         {
-          displayName: 'Lead Data (JSON)',
-          name: 'leadData',
-          type: 'json',
-          required: false,
+          displayName: 'Email (Optional)',
+          name: 'email',
+          type: 'string',
           displayOptions: {
             show: {
-              operation: ['add', 'update'],
+              operation: ['update'],
             },
           },
           default: '',
-          description: 'JSON object with lead properties (e.g. name, email)',
         },
-      ],
+        {
+          displayName: 'Attributes (JSON)',
+          name: 'attributes',
+          type: 'json',
+          displayOptions: {
+            show: {
+              operation: ['update'],
+            },
+          },
+          default: '',
+          description: 'Example: {"firstName": "John", "lastName": "Doe"}',
+        },
+        {
+          displayName: 'Lead Status',
+          name: 'leadStatus',
+          type: 'string',
+          displayOptions: {
+            show: {
+              operation: ['update'],
+            },
+          },
+          default: '',
+        },
+      
+        // ✅ For Delete
+        {
+          displayName: 'Lead IDs (Array)',
+          name: 'leadIds',
+          type: 'json',
+          displayOptions: {
+            show: {
+              operation: ['delete'],
+            },
+          },
+          default: '[]',
+        },
+        {
+          displayName: 'Contains (Filter)',
+          name: 'contains',
+          type: 'string',
+          displayOptions: {
+            show: {
+              operation: ['delete'],
+            },
+          },
+          default: '',
+        },
+        {
+          displayName: 'Exclude (Lead IDs)',
+          name: 'exclude',
+          type: 'json',
+          displayOptions: {
+            show: {
+              operation: ['delete'],
+            },
+          },
+          default: '[]',
+        },
+        {
+          displayName: 'Lead Status',
+          name: 'leadStatus',
+          type: 'string',
+          displayOptions: {
+            show: {
+              operation: ['delete'],
+            },
+          },
+          default: '',
+        },
+      ],      
     };
   
     async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
       const returnData: INodeExecutionData[] = [];
       const items = this.getInputData();
-  
-      const credentials = await this.getCredentials('reachInboxApi') as {
-        apiKey: string;
-        baseUrl: string;
-      };
-  
-      const headers = {
-        Authorization: `Bearer ${credentials.apiKey}`,
-        'Content-Type': 'application/json',
-      };
+      const credentials = await this.getCredentials('reachInboxApi') as { apiKey: string; baseUrl: string };
+      const headers = { Authorization: `Bearer ${credentials.apiKey}`, 'Content-Type': 'application/json' };
   
       for (let i = 0; i < items.length; i++) {
         const operation = this.getNodeParameter('operation', i) as string;
-        let responseData;
+        const campaignId = this.getNodeParameter('campaignId', i) as string;
   
         try {
           if (operation === 'add') {
-            const leadData = this.getNodeParameter('leadData', i, {}) as object;
+            const rawLeads = this.getNodeParameter('leads', i);
+            console.log('✅ Raw Leads:', rawLeads);
+            const rawCoreVars = this.getNodeParameter('newCoreVariables', i);
+            console.log('✅ Raw Core Variables:', rawCoreVars);
+            const leads = typeof rawLeads === 'string' ? JSON.parse(rawLeads) : rawLeads;
+            const newCoreVariables = typeof rawCoreVars === 'string' ? JSON.parse(rawCoreVars) : rawCoreVars;
+            console.log('✅ Parsed Leads:', leads);
+            console.log('✅ Parsed Core Variables:', newCoreVariables);
   
-            responseData = await axios.post(
-              `${credentials.baseUrl}/leads`,
-              leadData,
-              { headers },
-            );
+            const body = { campaignId, leads, newCoreVariables: newCoreVariables || [], duplicates: [] };
+            console.log('✅ Body:', body);
+            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/add`, body, { headers });
+            console.log('✅ Response:', response.data);
+            returnData.push({ json: response.data });
           }
   
           if (operation === 'update') {
             const leadId = this.getNodeParameter('leadId', i) as string;
-            const leadData = this.getNodeParameter('leadData', i, {}) as object;
+            const email = this.getNodeParameter('email', i) as string;
+            const attributes = this.getNodeParameter('attributes', i);
+            const leadStatus = this.getNodeParameter('leadStatus', i) as string;
   
-            responseData = await axios.post(
-              `${credentials.baseUrl}/leads/${leadId}`,
-              leadData,
-              { headers },
-            );
+            const body: any = { campaignId, leadId, attributes };
+            if (email) body.email = email;
+            if (leadStatus) body.leadStatus = leadStatus;
+  
+            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads`, body, { headers });
+            returnData.push({ json: response.data });
           }
   
           if (operation === 'delete') {
-            const leadId = this.getNodeParameter('leadId', i) as string;
+            const leadIds = this.getNodeParameter('leadIds', i);
+            const contains = this.getNodeParameter('contains', i) as string;
+            const exclude = this.getNodeParameter('exclude', i);
+            const leadStatus = this.getNodeParameter('leadStatus', i) as string;
   
-            responseData = await axios.post(
-              `${credentials.baseUrl}/leads/${leadId}/delete`,
-              {},
-              { headers },
-            );
+            const body = { campaignId, leadIds, contains, exclude, leadStatus, status: leadStatus };
+            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/delete`, body, { headers });
+            returnData.push({ json: response.data });
           }
-  
-          returnData.push({
-            json: responseData?.data || {},
-          });
-        } catch (error) {
-          returnData.push({
-            json: { error: error.message },
-          });
+        } catch (error: any) {
+          returnData.push({ json: { error: error.message, ...(error.response?.data && { details: error.response.data }) } });
         }
       }
   
       return [returnData];
     }
+    
   }
   

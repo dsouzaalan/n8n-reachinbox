@@ -1,7 +1,7 @@
 import { ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class Reachinbox implements ICredentialType {
-	name = 'reachinbox';
+	name = 'reachInboxApi';
 	displayName = 'Reachinbox Credentials';
 	documentationUrl = 'https://docs.reachinbox.ai';
 	properties: INodeProperties[] = [

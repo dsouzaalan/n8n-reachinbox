@@ -1,146 +1,164 @@
+// ✅ Updated Reachinbox.node.ts
 import {
-  IHookFunctions,
+  IExecuteFunctions,
+  INodeExecutionData,
   INodeInputConfiguration,
   INodeOutputConfiguration,
   INodeType,
   INodeTypeDescription,
-  IWebhookFunctions,
-  IWebhookResponseData,
   NodeConnectionType,
-  NodeOperationError
 } from 'n8n-workflow';
 
 import axios from 'axios';
 
 export class Reachinbox implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'ReachInbox Node',
+    displayName: 'ReachInbox',
     name: 'reachInbox',
-    group: ['trigger'],
+    group: ['transform'],
     version: 1,
-    description: 'Trigger node for ReachInbox events',
+    description: 'Add, update, or delete leads in ReachInbox',
     defaults: {
-      name: 'ReachInbox Trigger',
+      name: 'ReachInbox',
     },
     inputs: ['main'] as (NodeConnectionType | INodeInputConfiguration)[],
     outputs: ['main'] as (NodeConnectionType | INodeOutputConfiguration)[],
     credentials: [
       {
-        name: 'reachinboxApi',
+        name: 'reachInboxApi',
         required: true,
-      },
-    ],
-    webhooks: [
-      {
-        name: 'default',
-        httpMethod: 'POST',
-        responseMode: 'onReceived',
-        path: 'reachinbox',
       },
     ],
     properties: [
       {
-        displayName: 'Event Type',
-        name: 'eventType',
+        displayName: 'Operation',
+        name: 'operation',
         type: 'options',
         options: [
-          { name: 'All Events', value: 'ALL_EVENTS' },
-          { name: 'Email Sent', value: 'EMAIL_SENT' },
-          { name: 'Lead Interested', value: 'LEAD_INTERESTED' },
-          { name: 'Lead Not Interested', value: 'LEAD_NOT_INTERESTED' },
-          { name: 'Email Bounced', value: 'EMAIL_BOUNCED' },
-          { name: 'Email Opened', value: 'EMAIL_OPENED' },
-          { name: 'Email Link Clicked', value: 'EMAIL_LINK_CLICKED' },
-          { name: 'Reply Received', value: 'REPLY_RECEIVED' },
-          { name: 'Campaign Completed', value: 'CAMPAIGN_COMPLETED' },
+          { name: 'Add Lead(s)', value: 'add' },
+          { name: 'Update Lead', value: 'update' },
+          { name: 'Delete Leads', value: 'delete' },
         ],
-        default: 'EMAIL_SENT',
-        required: true,
-        description: 'Event type to listen for from ReachInbox',
+        default: 'add',
+      },
+      { displayName: 'Campaign ID', name: 'campaignId', type: 'string', required: true, default: '' },
+      {
+        displayName: 'Leads (JSON Array)',
+        name: 'leads',
+        type: 'json',
+        displayOptions: { show: { operation: ['add'] } },
+        default: '',
       },
       {
-        displayName: 'Campaign ID',
-        name: 'campaignId',
+        displayName: 'New Core Variables (Optional)',
+        name: 'newCoreVariables',
+        type: 'json',
+        displayOptions: { show: { operation: ['add'] } },
+        default: '',
+      },
+      {
+        displayName: 'Lead ID',
+        name: 'leadId',
         type: 'string',
-        default: '0',
-        description: 'Set to 0 to receive events from all campaigns',
+        displayOptions: { show: { operation: ['update'] } },
+        default: '',
+      },
+      {
+        displayName: 'Email (Optional)',
+        name: 'email',
+        type: 'string',
+        displayOptions: { show: { operation: ['update'] } },
+        default: '',
+      },
+      {
+        displayName: 'Attributes (JSON)',
+        name: 'attributes',
+        type: 'json',
+        displayOptions: { show: { operation: ['update'] } },
+        default: '{}',
+      },
+      {
+        displayName: 'Lead Status',
+        name: 'leadStatus',
+        type: 'string',
+        displayOptions: { show: { operation: ['update', 'delete'] } },
+        default: '',
+      },
+      {
+        displayName: 'Lead IDs (Optional)',
+        name: 'leadIds',
+        type: 'json',
+        displayOptions: { show: { operation: ['delete'] } },
+        default: '[]',
+      },
+      {
+        displayName: 'Contains (Filter)',
+        name: 'contains',
+        type: 'string',
+        displayOptions: { show: { operation: ['delete'] } },
+        default: '',
+      },
+      {
+        displayName: 'Exclude (Lead IDs)',
+        name: 'exclude',
+        type: 'json',
+        displayOptions: { show: { operation: ['delete'] } },
+        default: '[]',
       },
     ],
   };
 
-  webhookMethods = {
-    default: {
-      async checkExists(this: IHookFunctions): Promise<boolean> {
-        return false; // Always re-register for now
-      },
+  async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+    const returnData: INodeExecutionData[] = [];
+    const items = this.getInputData();
+    const credentials = await this.getCredentials('reachInboxApi') as { apiKey: string; baseUrl: string };
+    const headers = { Authorization: `Bearer ${credentials.apiKey}`, 'Content-Type': 'application/json' };
 
-      async create(this: IHookFunctions): Promise<boolean> {
-        const credentials = await this.getCredentials('reachinboxApi');
+    for (let i = 0; i < items.length; i++) {
+      const operation = this.getNodeParameter('operation', i) as string;
+      const campaignId = this.getNodeParameter('campaignId', i) as string;
 
-        let eventType: string;
-        let campaignId: string;
+      try {
+        if (operation === 'add') {
+          const rawLeads = this.getNodeParameter('leads', i);
+          const rawCoreVars = this.getNodeParameter('newCoreVariables', i);
+          const leads = typeof rawLeads === 'string' ? JSON.parse(rawLeads) : rawLeads;
+          const newCoreVariables = typeof rawCoreVars === 'string' ? JSON.parse(rawCoreVars) : rawCoreVars;
 
-        try {
-          eventType = this.getNodeParameter('eventType', 0) as string;
-          campaignId = this.getNodeParameter('campaignId', 0) as string;
-        } catch (error) {
-          throw new NodeOperationError(this.getNode(), 'Missing required parameters: eventType or campaignId');
+          const body = { campaignId, leads, newCoreVariables: newCoreVariables || [], duplicates: [] };
+          const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/add`, body, { headers });
+          returnData.push({ json: response.data });
         }
 
-        const webhookUrl = this.getNodeWebhookUrl('default');
+        if (operation === 'update') {
+          const leadId = this.getNodeParameter('leadId', i) as string;
+          const email = this.getNodeParameter('email', i) as string;
+          const attributes = this.getNodeParameter('attributes', i);
+          const leadStatus = this.getNodeParameter('leadStatus', i) as string;
 
-        await axios.post('https://api.reachinbox.ai/webhook/subscribe', {
-          event: eventType,
-          campaignId,
-          callbackUrl: webhookUrl,
-          integrationType: 'N8N',
-          allCampaigns: campaignId === '0',
-        }, {
-          headers: {
-            Authorization: `Bearer ${credentials.apiKey}`,
-          },
-        });
+          const body: any = { campaignId, leadId, attributes };
+          if (email) body.email = email;
+          if (leadStatus) body.leadStatus = leadStatus;
 
-        return true;
-      },
-
-      async delete(this: IHookFunctions): Promise<boolean> {
-        const credentials = await this.getCredentials('reachinboxApi');
-
-        let eventType: string;
-        let campaignId: string;
-
-        try {
-          eventType = this.getNodeParameter('eventType', 0) as string;
-          campaignId = this.getNodeParameter('campaignId', 0) as string;
-        } catch (error) {
-          throw new NodeOperationError(this.getNode(), 'Missing required parameters: eventType or campaignId');
+          const response = await axios.post(`${credentials.baseUrl}/api/v1/leads`, body, { headers });
+          returnData.push({ json: response.data });
         }
 
-        const webhookUrl = this.getNodeWebhookUrl('default');
+        if (operation === 'delete') {
+          const leadIds = this.getNodeParameter('leadIds', i);
+          const contains = this.getNodeParameter('contains', i) as string;
+          const exclude = this.getNodeParameter('exclude', i);
+          const leadStatus = this.getNodeParameter('leadStatus', i) as string;
 
-        await axios.delete('https://api.reachinbox.ai/webhook/delete', {
-          headers: {
-            Authorization: `Bearer ${credentials.apiKey}`,
-          },
-          data: {
-            event: eventType,
-            campaignId,
-            callbackUrl: webhookUrl,
-            allCampaigns: campaignId === '0',
-          },
-        });
+          const body = { campaignId, leadIds, contains, exclude, leadStatus, status: leadStatus };
+          const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/delete`, body, { headers });
+          returnData.push({ json: response.data });
+        }
+      } catch (error: any) {
+        returnData.push({ json: { error: error.message, ...(error.response?.data && { details: error.response.data }) } });
+      }
+    }
 
-        return true;
-      },
-    },
-  };
-
-  async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-    const body = this.getBodyData();
-    console.log('[ReachInbox] Webhook Triggered:', JSON.stringify(body));
-    return {
-      workflowData: [[{ json: body }]],
-    };
+    return [returnData];
   }
 }
