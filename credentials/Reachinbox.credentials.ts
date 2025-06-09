@@ -1,8 +1,4 @@
-import {
-	IAuthenticateGeneric,
-	ICredentialType,
-	INodeProperties,
-} from 'n8n-workflow';
+import { ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class Reachinbox implements ICredentialType {
 	name = 'reachinbox';
@@ -13,15 +9,16 @@ export class Reachinbox implements ICredentialType {
 			displayName: 'API Key',
 			name: 'apiKey',
 			type: 'string',
+			typeOptions: {
+				password: true,
+			},
 			default: '',
 		},
-	];
-	authenticate = {
-		type: 'generic',
-		properties: {
-			qs: {
-				'api_key': '={{$credentials.apiKey}}'
-			}
+		{
+			displayName: 'Base URL',
+			name: 'baseUrl',
+			type: 'string',
+			default: 'https://api.reachinbox.ai',
 		},
-	} as IAuthenticateGeneric;
+	];
 }

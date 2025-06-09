@@ -33,7 +33,8 @@
       "dist/credentials/Reachinbox.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Reachinbox/Reachinbox.node.js"
+      "dist/nodes/ReachinboxNode/Reachinbox.node.js",
+      "dist/nodes/ReachinboxNode/ReachinboxAction.node.js"
     ]
   },
   "devDependencies": {

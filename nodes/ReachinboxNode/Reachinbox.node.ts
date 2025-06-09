@@ -6,12 +6,13 @@ import {
   INodeTypeDescription,
   IWebhookFunctions,
   IWebhookResponseData,
+  NodeConnectionType,
   NodeOperationError
 } from 'n8n-workflow';
 
 import axios from 'axios';
 
-export class ReachInbox implements INodeType {
+export class Reachinbox implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'ReachInbox Node',
     name: 'reachInbox',
@@ -21,8 +22,8 @@ export class ReachInbox implements INodeType {
     defaults: {
       name: 'ReachInbox Trigger',
     },
-    inputs: ['main'] as unknown as INodeInputConfiguration[],
-    outputs: ['main'] as unknown as INodeOutputConfiguration[],
+    inputs: ['main'] as (NodeConnectionType | INodeInputConfiguration)[],
+    outputs: ['main'] as (NodeConnectionType | INodeOutputConfiguration)[],
     credentials: [
       {
         name: 'reachinboxApi',
