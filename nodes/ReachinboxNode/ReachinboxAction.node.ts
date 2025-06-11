@@ -43,7 +43,7 @@ import {
             {
               name: 'Update Lead',
               value: 'update',
-              description: 'Update a specific lead’s data',
+              description: 'Update a specific lead\'s data',
             },
             {
               name: 'Delete Leads',
@@ -198,18 +198,12 @@ import {
         try {
           if (operation === 'add') {
             const rawLeads = this.getNodeParameter('leads', i);
-            console.log('✅ Raw Leads:', rawLeads);
             const rawCoreVars = this.getNodeParameter('newCoreVariables', i);
-            console.log('✅ Raw Core Variables:', rawCoreVars);
             const leads = typeof rawLeads === 'string' ? JSON.parse(rawLeads) : rawLeads;
             const newCoreVariables = typeof rawCoreVars === 'string' ? JSON.parse(rawCoreVars) : rawCoreVars;
-            console.log('✅ Parsed Leads:', leads);
-            console.log('✅ Parsed Core Variables:', newCoreVariables);
   
             const body = { campaignId, leads, newCoreVariables: newCoreVariables || [], duplicates: [] };
-            console.log('✅ Body:', body);
-            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/add`, body, { headers });
-            console.log('✅ Response:', response.data);
+            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/n8n/add`, body, { headers });
             returnData.push({ json: response.data });
           }
   
@@ -222,8 +216,7 @@ import {
             const body: any = { campaignId, leadId, attributes };
             if (email) body.email = email;
             if (leadStatus) body.leadStatus = leadStatus;
-  
-            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads`, body, { headers });
+            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/n8n/update`, body, { headers });
             returnData.push({ json: response.data });
           }
   
@@ -232,9 +225,9 @@ import {
             const contains = this.getNodeParameter('contains', i) as string;
             const exclude = this.getNodeParameter('exclude', i);
             const leadStatus = this.getNodeParameter('leadStatus', i) as string;
-  
+
             const body = { campaignId, leadIds, contains, exclude, leadStatus, status: leadStatus };
-            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/delete`, body, { headers });
+            const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/n8n/delete`, body, { headers });
             returnData.push({ json: response.data });
           }
         } catch (error: any) {
@@ -246,4 +239,3 @@ import {
     }
     
   }
-  
