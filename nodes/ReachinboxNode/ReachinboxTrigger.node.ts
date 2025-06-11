@@ -1,4 +1,5 @@
 import {
+	ILoadOptionsFunctions,
 	INodeOutputConfiguration,
 	INodeType,
 	INodeTypeDescription,
@@ -22,7 +23,7 @@ export class ReachinboxTrigger implements INodeType {
 		credentials: [
 			{
 				name: 'reachInboxApi',
-				required: false,
+				required: true,
 			},
 		],
 		webhooks: [
@@ -37,67 +38,66 @@ export class ReachinboxTrigger implements INodeType {
 			{
 				displayName: 'Event',
 				name: 'event',
-				type: 'options',
-				options: [
-					{
-						name: 'All Events',
-						value: 'ALL_EVENTS',
-						description: 'Triggers on any event from ReachInbox',
-					},
-					{
-						name: 'Email Sent',
-						value: 'EMAIL_SENT',
-						description: 'Triggers when an email is successfully sent.',
-					},
-					{
-						name: 'Email Opened',
-						value: 'EMAIL_OPENED',
-						description: 'Triggers when an email is opened.',
-					},
-					{
-						name: 'Email Link Clicked',
-						value: 'EMAIL_CLICKED',
-						description: 'Triggers when a link inside an email is clicked.',
-					},
-					{
-						name: 'Reply Received',
-						value: 'REPLY_RECEIVED',
-						description: 'Triggers when a reply to an email is received.',
-					},
-					{
-						name: 'Email Bounced',
-						value: 'EMAIL_BOUNCED',
-						description: 'Triggers when an email is bounced.',
-					},
-					{
-						name: 'Lead Interested',
-						value: 'LEAD_INTERESTED',
-						description: 'Triggers when a lead is marked as interested.',
-					},
-					{
-						name: 'Lead Not Interested',
-						value: 'LEAD_NOT_INTERESTED',
-						description: 'Triggers when a lead is marked as not interested.',
-					},
-					{
-						name: 'Campaign Completed',
-						value: 'CAMPAIGN_COMPLETED',
-						description: 'Triggers when a campaign is completed.',
-					},
-				],
-				default: 'ALL_EVENTS',
-				description: 'Event to listen for',
+				type: 'multiOptions',
+				typeOptions: {
+					loadOptionsMethod: 'getReachInboxEvents',
+				},
+				default: ['ALL_EVENTS'],
+				description:
+					'Select the specific events that should trigger this workflow. If none selected, all events will trigger.',
 			},
 		],
 	};
 
+	methods = {
+		loadOptions: {
+			async getReachInboxEvents(this: ILoadOptionsFunctions) {
+				const credentials = await this.getCredentials('reachInboxApi');
+				console.log(credentials);
+				const baseUrl = credentials.baseUrl;
+				console.log(baseUrl);
+				const apiKey = credentials.apiKey;
+				console.log(apiKey);
+				const responseRaw = await this.helpers.request({
+					method: 'GET',
+					url: `${baseUrl}/api/v1/webhook/event`,
+					headers: {
+						Authorization: `Bearer ${apiKey}`,
+					},
+				});
+				console.log(responseRaw);
+				let response: any = responseRaw;
+				if (typeof responseRaw === 'string') {
+					try {
+						response = JSON.parse(responseRaw);
+					} catch (e) {
+						throw new Error('Failed to parse response from ReachInbox API');
+					}
+				}
+
+				if (!Array.isArray(response)) {
+					throw new Error('Unexpected response format from ReachInbox API');
+				}
+
+				return response.map((event: { id: string; value: string }) => ({
+					name: event.value, // Display name shown to the user
+					value: event.id, // Actual value sent when selected
+				}));
+			},
+		},
+	};
+
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		const body = this.getBodyData();
-		const selectedEvent = this.getNodeParameter('event');
+		console.log(body);
+		const selectedEvents = this.getNodeParameter('event') as string[];
 
-		if (selectedEvent === 'ALL_EVENTS' || body.event === selectedEvent) {
+		const eventType = (body && typeof body === 'object' && 'event' in body) ? (body as any).event : undefined;
+		const eventData = (body && typeof body === 'object' && 'eventData' in body) ? (body as any).eventData : undefined;
+
+		if (!selectedEvents || selectedEvents.length === 0 || selectedEvents.includes('ALL_EVENTS') || (eventType && selectedEvents.includes(eventType))) {
 			return {
-				workflowData: [this.helpers.returnJsonArray([body])],
+				workflowData: [this.helpers.returnJsonArray([eventData ?? body])],
 			};
 		}
 

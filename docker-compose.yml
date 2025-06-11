@@ -2,16 +2,23 @@ version: "3.8"
 
 services:
   n8n:
+    image: docker.n8n.io/n8nio/n8n
     container_name: n8n
-    image: n8nio/n8n:latest
-    restart: unless-stopped
     ports:
       - "5678:5678"
     volumes:
-      - ./n8n_data:/home/node/.n8n
-      - ./n8n/backup:/backup
-      - ./share:/data/shared
-
-volumes:
-  n8n_data:
-
+      # - n8n_data:/home/node/.n8n
+      # This is the bind mount for your custom nodes
+      - /Users/anshumohanacharya/.n8n/custom/node_modules/n8n-nodes-reachinbox/dist:/home/node/.n8n/custom/node_modules/n8n-nodes-reachinbox/dist
+    restart: unless-stopped
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=false
+      - N8N_SECURE_COOKIE=false
+      - N8N_HOST=n8n.outbox.vc
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.outbox.vc
+      - WEBHOOK_TUNNEL_URL=https://n8n.outbox.vc
+      - N8N_EDITOR_BASE_URL=https://n8n.outbox.vc
+      - VUE_APP_URL_BASE_API=https://n8n.outbox.vc
+    tty: true
