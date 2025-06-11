@@ -14,6 +14,7 @@ import {
     description: INodeTypeDescription = {
       displayName: 'ReachInbox',
       name: 'reachInbox',
+      icon: 'file:Logo.png',
       group: ['transform'],
       version: 1,
       description: 'Interact with ReachInbox leads',

@@ -12,6 +12,7 @@ export class ReachinboxTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ReachInbox Trigger',
 		name: 'reachInboxTrigger',
+		icon: 'file:Logo.png',
 		group: ['trigger'],
 		version: 1,
 		description: 'Triggers workflow on ReachInbox events',
