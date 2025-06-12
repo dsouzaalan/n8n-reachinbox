@@ -15,7 +15,7 @@ export class Reachinbox implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'ReachInbox',
     name: 'reachInbox',
-    icon: 'file:Logo.png',
+    icon: 'file:logo.svg',
     group: ['transform'],
     version: 1,
     description: 'Add, update, or delete leads in ReachInbox',
