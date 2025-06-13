@@ -1,116 +1,131 @@
 ![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
 
-# n8n-nodes-starter
+# n8n-nodes-reachinbox
 
-This repo contains example nodes to help you get started building your own custom integrations for [n8n](https://n8n.io). It includes the node linter and other dependencies.
+This custom node allows users to connect [ReachInbox.ai](https://reachinbox.ai) with n8n, enabling workflows to be triggered by email events (e.g. email sent, reply received) and perform powerful actions like adding leads, updating their statuses, starting campaigns, and more.
 
-To make your custom node available to the community, you must create it as an npm package, and [submit it to the npm registry](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
-
-If you would like your node to be available on n8n cloud you can also [submit your node for verification](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/).
+n8n is a fair-code licensed workflow automation platform.
 
 ---
 
-## Prerequisites
+## 📦 Installation
 
-You need the following installed on your development machine:
+Follow the official [n8n custom nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) to install this package.
 
-* [git](https://git-scm.com/downloads)
+```bash
+npm install n8n-nodes-reachinbox
+```
 
-* Node.js and npm (Minimum version: Node 20).
-  Install with [nvm](https://github.com/nvm-sh/nvm) for Linux, Mac, and WSL. For Windows, follow [Microsoft's guide](https://docs.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows).
+Or for local development:
 
-* Install n8n globally:
+```bash
+git clone https://github.com/<your-org>/n8n-nodes-reachinbox.git
+cd n8n-nodes-reachinbox
+npm install
+npm run build
+npm link
+```
 
-  ```bash
-  npm install n8n -g
-  ```
+Then link it in your local `~/.n8n/custom/` folder:
 
-* Recommended: [Set up your development environment](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/).
-
----
-
-## Using this Starter
-
-These are the basic steps to start building your own n8n node:
-
-1. [Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template.
-2. Clone your repo:
-
-   ```bash
-   git clone https://github.com/<your-org>/<your-repo-name>.git
-   ```
-3. Navigate into the project and install dependencies:
-
-   ```bash
-   cd <your-repo-name>
-   npm install
-   ```
-4. Open the project in your code editor.
-5. Modify or replace the sample nodes in `/nodes` and `/credentials`.
-6. Update `package.json` with your own package details.
-7. Lint your code:
-
-   ```bash
-   npm run lint       # Check for issues
-   npm run lintfix    # Fix what can be auto-corrected
-   ```
-8. Build your package:
-
-   ```bash
-   npm run build
-   ```
+```bash
+cd ~/.n8n/custom
+npm init -y
+npm link n8n-nodes-reachinbox
+```
 
 ---
 
-## Testing Your Node Locally
+## 🤖 ReachInbox Setup
 
-To test your node in a local n8n installation:
+To use this integration, you’ll need an **API Key** from ReachInbox:
 
-1. **Publish your node locally:**
-
-   ```bash
-   npm link
-   ```
-
-2. **Link it to your local n8n instance:**
-
-   Navigate to your n8n custom nodes directory. This is typically:
-
-   ```
-   ~/.n8n/custom/
-   ```
-   
-   If it doesn't exist, create it and initialize a package:
-
-   ```bash
-   mkdir -p ~/.n8n/custom
-   cd ~/.n8n/custom
-   npm init
-   ```
-
-3. **Link your custom node:**
-
-   ```bash
-   npm link <your-node-package-name>
-   ```
-
-4. **Start n8n:**
-
-   ```bash
-   n8n
-   ```
-
-5. **Open n8n in your browser** and search for your node in the node panel.
+1. Log in to [ReachInbox.ai](https://app.reachinbox.ai).
+2. Go to **Settings** > **Integrations** > **n8n**.
+3. Copy your API Key and Base URL (typically `https://api.reachinbox.ai`).
 
 ---
 
-## Troubleshooting
+## 🔧 Credentials
 
-* **No `custom/` directory in `~/.n8n`?**
-  You need to create it manually:
+This node requires the following credentials:
 
-  ```bash
-  mkdir ~/.n8n/custom
-  cd ~/.n8n/custom
-  npm init
-  ```
+* **API Key**: Your ReachInbox API key.
+* **Base URL**: API base URL (`https://api.reachinbox.ai`).
+
+Set these up once in the **Credentials** section in n8n.
+
+---
+
+## ⚡ Operations
+
+### 🟢 Triggers
+
+You can use this node to trigger workflows on events like:
+
+* Email Sent
+* Email Opened
+* Email Link Clicked
+* Reply Received
+* Email Bounced
+* Lead Interested
+* Lead Not Interested
+* Campaign Completed
+* Or trigger on **All Events**
+
+These are dynamically fetched from ReachInbox’s API.
+After setting up, a webhook URL will be generated which you must add in ReachInbox → **Integrations** → **Webhooks**.
+
+### 🛠️ Actions
+
+* **Add Lead to Campaign**
+* **Update Lead to Campaign**
+* **Remove Lead to Campaign**
+
+All actions require selecting a campaign and passing necessary data (email, first name, last name, etc.), which can be mapped from previous steps.
+
+---
+
+## ✅ Usage
+
+1. **Install the node** as described in the installation section.
+2. **Drag the ReachInbox Trigger or Action node** into your workflow.
+3. **Set up your credentials** by entering your API key and base URL.
+4. **Choose a trigger event** or action.
+5. **Map the required fields**, test the workflow, and activate.
+
+You can now fully automate your cold outreach operations.
+
+---
+
+## 🧪 Testing Locally
+
+To run locally:
+
+```bash
+n8n
+```
+
+Then open [http://localhost:5678](http://localhost:5678) and search for **ReachInbox** in the node list.
+
+---
+
+## 📎 Compatibility
+
+* Tested on **n8n v1.75.2**
+* Node.js **v20+**
+
+---
+
+## 🕓 Version History
+
+| Version | Description                                          |
+| ------- | ---------------------------------------------------- |
+| 0.1.0   | Initial release with full trigger and action support |
+
+---
+
+## 🧩 Resources
+
+* [ReachInbox API Docs](https://docs.reachinbox.ai)
+* [n8n Community Nodes Guide](https://docs.n8n.io/integrations/community-nodes/)

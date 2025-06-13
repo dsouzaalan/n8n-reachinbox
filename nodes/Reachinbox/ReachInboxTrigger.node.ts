@@ -6,6 +6,7 @@ import {
 	IWebhookFunctions,
 	IWebhookResponseData,
 	NodeConnectionType,
+	NodeOperationError, // Import NodeOperationError
 } from 'n8n-workflow';
 
 export class ReachinboxTrigger implements INodeType {
@@ -37,7 +38,7 @@ export class ReachinboxTrigger implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Event',
+				displayName: 'Event Names or IDs',
 				name: 'event',
 				type: 'multiOptions',
 				typeOptions: {
@@ -45,7 +46,7 @@ export class ReachinboxTrigger implements INodeType {
 				},
 				default: ['ALL_EVENTS'],
 				description:
-					'Select the specific events that should trigger this workflow. If none selected, all events will trigger.',
+					'Select the specific events that should trigger this workflow. If none selected, all events will trigger. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	};
@@ -70,12 +71,18 @@ export class ReachinboxTrigger implements INodeType {
 					try {
 						response = JSON.parse(responseRaw);
 					} catch (e) {
-						throw new Error('Failed to parse response from ReachInbox API');
+						throw new NodeOperationError(
+							this.getNode(),
+							'Failed to parse response from ReachInbox API',
+						);
 					}
 				}
 
 				if (!Array.isArray(response)) {
-					throw new Error('Unexpected response format from ReachInbox API');
+					throw new NodeOperationError(
+						this.getNode(),
+						'Unexpected response format from ReachInbox API',
+					);
 				}
 
 				return response.map((event: { id: string; value: string }) => ({
@@ -105,18 +112,18 @@ export class ReachinboxTrigger implements INodeType {
 					json: true,
 				});
 
-				console.log("response");
+				console.log('response');
 
 				return true;
 			},
 
 			async checkExists(this: IWebhookFunctions): Promise<boolean> {
 				const credentials = await this.getCredentials('reachInboxApi');
-				console.log("credentials");
+				console.log('credentials');
 				const baseUrl = credentials.baseUrl;
 				const apiKey = credentials.apiKey;
 				const webhookUrl = this.getNodeWebhookUrl('default');
-				console.log("webhookUrl");
+				console.log('webhookUrl');
 
 				const existing = await this.helpers.request({
 					method: 'GET',
@@ -138,8 +145,10 @@ export class ReachinboxTrigger implements INodeType {
 		const body = this.getBodyData();
 		const selectedEvents = this.getNodeParameter('event') as string[];
 
-		const eventType = (body && typeof body === 'object' && 'event' in body) ? (body as any).event : undefined;
-		const eventData = (body && typeof body === 'object' && 'eventData' in body) ? (body as any).eventData : undefined;
+		const eventType =
+			body && typeof body === 'object' && 'event' in body ? (body as any).event : undefined;
+		const eventData =
+			body && typeof body === 'object' && 'eventData' in body ? (body as any).eventData : undefined;
 
 		if (
 			!selectedEvents ||

@@ -1,15 +1,15 @@
 {
   "name": "n8n-nodes-reachinbox",
   "version": "0.1.0",
-  "description": "",
+  "description": "Custom Node for ReachInbox",
   "keywords": [
     "n8n-community-node-package"
   ],
   "license": "MIT",
   "homepage": "",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "Reachinbox",
+    "email": "m@reachinbox.ai"
   },
   "repository": {
     "type": "git",
@@ -33,9 +33,8 @@
       "dist/credentials/Reachinbox.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ReachinboxNode/Reachinbox.node.js",
-      "dist/nodes/ReachinboxNode/ReachinboxAction.node.js",
-      "dist/nodes/ReachinboxNode/ReachinboxTrigger.node.js"
+      "dist/nodes/Reachinbox/Reachinbox.node.js",
+      "dist/nodes/Reachinbox/ReachinboxTrigger.node.js"
     ]
   },
   "devDependencies": {
