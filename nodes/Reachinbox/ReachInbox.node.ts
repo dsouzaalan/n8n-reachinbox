@@ -220,7 +220,6 @@ export class Reachinbox implements INodeType {
 						newCoreVariables: newCoreVariables || [],
 						duplicates: [],
 					};
-					console.log('Add lead body: ', body);
 					const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/n8n/add`, body, {
 						headers,
 					});
@@ -236,7 +235,6 @@ export class Reachinbox implements INodeType {
 					const body: any = { campaignId, leadId, attributes };
 					if (email) body.email = email;
 					if (leadStatus) body.leadStatus = leadStatus;
-					console.log('Update lead body: ', body);
 					const response = await axios.post(
 						`${credentials.baseUrl}/api/v1/leads/n8n/update`,
 						body,
@@ -252,7 +250,6 @@ export class Reachinbox implements INodeType {
 					const leadStatus = this.getNodeParameter('leadStatus', i) as string;
 
 					const body = { campaignId, leadIds, contains, exclude, leadStatus, status: leadStatus };
-					console.log('Delete lead body: ', body);
 					const response = await axios.post(
 						`${credentials.baseUrl}/api/v1/leads/n8n/delete`,
 						body,
