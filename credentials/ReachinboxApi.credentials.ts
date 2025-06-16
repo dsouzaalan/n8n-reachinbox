@@ -1,6 +1,6 @@
 import { ICredentialType, INodeProperties } from 'n8n-workflow';
 
-export class ReachInboxApi implements ICredentialType {
+export class ReachinboxApi implements ICredentialType {
 	name = 'reachInboxApi';
 	displayName = 'Reachinbox Credentials API';
 	documentationUrl = 'https://docs.reachinbox.ai';

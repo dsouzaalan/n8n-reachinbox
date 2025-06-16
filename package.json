@@ -30,7 +30,7 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ReachInboxApi.credentials.js"
+      "dist/credentials/ReachinboxApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/ReachInbox/ReachInbox.node.js",
