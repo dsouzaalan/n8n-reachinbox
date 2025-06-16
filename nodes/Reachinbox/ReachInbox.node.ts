@@ -10,7 +10,7 @@ import {
 
 import axios from 'axios';
 
-export class Reachinbox implements INodeType {
+export class ReachInbox implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ReachInbox',
 		name: 'reachInbox',

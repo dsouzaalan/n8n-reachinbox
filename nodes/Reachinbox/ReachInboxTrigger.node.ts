@@ -10,7 +10,7 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
-export class ReachinboxTrigger implements INodeType {
+export class ReachInboxTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ReachInbox Trigger',
 		name: 'reachInboxTrigger',

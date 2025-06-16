@@ -8,7 +8,7 @@
   "license": "MIT",
   "homepage": "",
   "author": {
-    "name": "Reachinbox",
+    "name": "ReachInbox",
     "email": "m@reachinbox.ai"
   },
   "repository": {
@@ -30,11 +30,11 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/Reachinbox.credentials.js"
+      "dist/credentials/ReachInboxApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Reachinbox/Reachinbox.node.js",
-      "dist/nodes/Reachinbox/ReachinboxTrigger.node.js"
+      "dist/nodes/ReachInbox/ReachInbox.node.js",
+      "dist/nodes/ReachInbox/ReachInboxTrigger.node.js"
     ]
   },
   "devDependencies": {
