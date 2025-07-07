@@ -18,7 +18,7 @@ export class ReachinboxApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'https://mailersapi.reachinbox.ai',
+			default: 'https://api.reachinbox.ai',
 		},
 	];
 }
