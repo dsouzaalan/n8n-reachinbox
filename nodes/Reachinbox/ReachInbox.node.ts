@@ -6,6 +6,7 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	NodeConnectionType,
+	NodeOperationError,
 } from 'n8n-workflow';
 
 import axios from 'axios';
@@ -36,48 +37,11 @@ export class ReachInbox implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					// Campaign Operations
-					{
-						name: 'Start a Campaign',
-						value: 'startCampaign',
-						description: 'Start a campaign',
-						action: 'Start a campaign',
-					},
-					{
-						name: 'Create Campaign',
-						value: 'createCampaign',
-						description: 'Create a new campaign',
-						action: 'Create a new campaign',
-					},
 					{
 						name: 'Add Email to Campaign',
 						value: 'addEmailToCampaign',
 						description: 'Add sending email accounts to a campaign',
 						action: 'Add email to campaign',
-					},
-					{
-						name: 'Update Campaign Details',
-						value: 'updateCampaignDetails',
-						description: 'Update campaign settings and options',
-						action: 'Update campaign details',
-					},
-					{
-						name: 'Add Sequences to Campaign',
-						value: 'addSequences',
-						description: 'Add email sequences to a campaign',
-						action: 'Add sequences to campaign',
-					},
-					{
-						name: 'Pause a Campaign',
-						value: 'pauseCampaign',
-						description: 'Pause a campaign',
-						action: 'Pause a campaign',
-					},
-					{
-						name: 'Get Campaign Status',
-						value: 'getCampaignStatus',
-						description: 'Get the current status of a campaign',
-						action: 'Get campaign status',
 					},
 					{
 						name: 'Add Lead to Campaign',
@@ -86,39 +50,17 @@ export class ReachInbox implements INodeType {
 						action: 'Add a lead to a campaign',
 					},
 					{
-						name: 'Update Lead in Campaign',
-						value: 'update',
-						description: "Update a specific lead's data",
-						action: 'Update a specific lead data',
-					},
-					{
-						name: 'Delete Lead from Campaign',
-						value: 'delete',
-						description: 'Delete a lead from a campaign',
-						action: 'Delete a lead from a campaign',
-					},
-					{
-						name: 'Pause/Resume Leads',
-						value: 'changeLeadsState',
-						description: 'Pause or resume leads in a campaign',
-						action: 'Pause or resume leads',
-					},
-
-					// Lead List Operations
-					{
 						name: 'Add Lead to Leads List',
 						value: 'addLeadToList',
 						description: 'Add a lead to a leads list',
 						action: 'Add a lead to a leads list',
 					},
 					{
-						name: 'Remove Lead from Leads List',
-						value: 'removeLeadFromList',
-						description: 'Remove a lead from a leads list',
-						action: 'Remove a lead from a leads list',
+						name: 'Add Sequences to Campaign',
+						value: 'addSequences',
+						description: 'Add email sequences to a campaign',
+						action: 'Add sequences to campaign',
 					},
-
-					// Blocklist Operations
 					{
 						name: 'Add to Blocklist',
 						value: 'addToBlocklist',
@@ -126,10 +68,62 @@ export class ReachInbox implements INodeType {
 						action: 'Add to blocklist',
 					},
 					{
-						name: 'Remove from Blocklist',
+						name: 'Create Campaign',
+						value: 'createCampaign',
+						description: 'Create a new campaign',
+						action: 'Create a new campaign',
+					},
+					{
+						name: 'Delete Lead From Campaign',
+						value: 'delete',
+						description: 'Delete a lead from a campaign',
+						action: 'Delete a lead from a campaign',
+					},
+					{
+						name: 'Get Campaign Status',
+						value: 'getCampaignStatus',
+						description: 'Get the current status of a campaign',
+						action: 'Get campaign status',
+					},
+					{
+						name: 'Pause a Campaign',
+						value: 'pauseCampaign',
+						action: 'Pause a campaign',
+					},
+					{
+						name: 'Pause/Resume Leads',
+						value: 'changeLeadsState',
+						description: 'Pause or resume leads in a campaign',
+						action: 'Pause or resume leads',
+					},
+					{
+						name: 'Remove From Blocklist',
 						value: 'removeFromBlocklist',
 						description: 'Remove keywords from blocklist',
 						action: 'Remove from blocklist',
+					},
+					{
+						name: 'Remove Lead From Leads List',
+						value: 'removeLeadFromList',
+						description: 'Remove a lead from a leads list',
+						action: 'Remove a lead from a leads list',
+					},
+					{
+						name: 'Start a Campaign',
+						value: 'startCampaign',
+						action: 'Start a campaign',
+					},
+					{
+						name: 'Update Campaign Details',
+						value: 'updateCampaignDetails',
+						description: 'Update campaign settings and options',
+						action: 'Update campaign details',
+					},
+					{
+						name: 'Update Lead in Campaign',
+						value: 'update',
+						description: "Update a specific lead's data",
+						action: 'Update a specific lead data',
 					},
 				],
 				default: 'add',
@@ -222,7 +216,7 @@ export class ReachInbox implements INodeType {
 				},
 			},
 			{
-				displayName: 'Delay (seconds)',
+				displayName: 'Delay (Seconds)',
 				name: 'delay',
 				type: 'number',
 				default: 0,
@@ -233,7 +227,7 @@ export class ReachInbox implements INodeType {
 				},
 			},
 			{
-				displayName: 'Random Delay (seconds)',
+				displayName: 'Random Delay (Seconds)',
 				name: 'randomDelay',
 				type: 'number',
 				default: 0,
@@ -402,8 +396,7 @@ export class ReachInbox implements INodeType {
 					},
 				},
 				default: '',
-				description:
-					'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}]',
+				description: 'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
 			},
 			{
 				displayName: 'New Core Variables (Array)',
@@ -537,8 +530,7 @@ export class ReachInbox implements INodeType {
 					},
 				},
 				default: '',
-				description:
-					'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}]',
+				description: 'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
 			},
 			{
 				displayName: 'New Core Variables (Array)',
@@ -779,7 +771,7 @@ export class ReachInbox implements INodeType {
 						.filter((email) => email.length > 0);
 
 					if (emailList.length === 0) {
-						throw new Error('No valid email(s) provided');
+						throw new NodeOperationError(this.getNode(), 'No valid email(s) provided');
 					}
 
 					const body = {

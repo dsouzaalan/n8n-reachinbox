@@ -45,20 +45,19 @@ export class ReachInboxTrigger implements INodeType {
 				typeOptions: {
 					loadOptionsMethod: 'getReachInboxEvents',
 				},
-				default: 'ALL_EVENTS',
+				default: '',
 				description:
 					'Select the specific event that should trigger this workflow. "All Events" will trigger for any event. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
-				displayName: 'Campaign',
+				displayName: 'Campaign Name or ID',
 				name: 'campaignId',
 				type: 'options',
 				typeOptions: {
 					loadOptionsMethod: 'getReachInboxCampaigns',
 				},
-				default: '0',
-				description:
-					'Select the campaign to subscribe to events for. Select "All Campaigns" for all events.',
+				default: '',
+				description: 'Select the campaign to subscribe to events for. Select "All Campaigns" for all events. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 		],
 	};
@@ -227,7 +226,7 @@ export class ReachInboxTrigger implements INodeType {
 						return true;
 					}
 
-					throw new Error('Failed to create webhook: Unexpected response');
+					throw new NodeOperationError(this.getNode(), 'Failed to create webhook: Unexpected response');
 				} catch (error) {
 					console.error('Error creating webhook:', error);
 					throw error;
@@ -264,7 +263,7 @@ export class ReachInboxTrigger implements INodeType {
 						return true;
 					}
 
-					throw new Error('Failed to delete webhook: Unexpected response');
+					throw new NodeOperationError(this.getNode(), 'Failed to delete webhook: Unexpected response');
 				} catch (error) {
 					console.error('Error deleting webhook:', error);
 					throw error;
