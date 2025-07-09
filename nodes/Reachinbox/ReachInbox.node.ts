@@ -9,8 +9,6 @@ import {
 	NodeOperationError,
 } from 'n8n-workflow';
 
-import axios from 'axios';
-
 export class ReachInbox implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'ReachInbox',
@@ -396,7 +394,8 @@ export class ReachInbox implements INodeType {
 					},
 				},
 				default: '',
-				description: 'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
+				description:
+					'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
 			},
 			{
 				displayName: 'New Core Variables (Array)',
@@ -530,7 +529,8 @@ export class ReachInbox implements INodeType {
 					},
 				},
 				default: '',
-				description: 'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
+				description:
+					'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
 			},
 			{
 				displayName: 'New Core Variables (Array)',
@@ -737,12 +737,14 @@ export class ReachInbox implements INodeType {
 			try {
 				if (operation === 'startCampaign') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/campaigns/start`,
-						{ campaignId },
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/campaigns/start`,
+						headers,
+						body: { campaignId },
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'createCampaign') {
@@ -752,12 +754,14 @@ export class ReachInbox implements INodeType {
 						name,
 					};
 
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/campaigns/create`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/campaigns/create`,
+						headers,
 						body,
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'addEmailToCampaign') {
@@ -779,19 +783,21 @@ export class ReachInbox implements INodeType {
 						emails: emailList,
 					};
 
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/campaigns/add-email`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/campaigns/add-email`,
+						headers,
 						body,
-						{ headers },
-					);
+						json: true,
+					});
 
 					// Format the response to match the API structure
 					const responseData = {
-						success: response.data.status === 200,
-						message: response.data.message,
+						success: response.status === 200,
+						message: response.message,
 						data: {
-							addedCount: response.data.data?.addedCount || 0,
-							failedEmails: response.data.data?.failedEmails || [],
+							addedCount: response.data?.addedCount || 0,
+							failedEmails: response.data?.failedEmails || [],
 						},
 					};
 
@@ -856,12 +862,14 @@ export class ReachInbox implements INodeType {
 						}
 					}
 
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/campaigns/update-details`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/campaigns/update-details`,
+						headers,
 						body,
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'addSequences') {
@@ -875,29 +883,37 @@ export class ReachInbox implements INodeType {
 						sequences,
 					};
 
-					const response = await axios.post(`${credentials.baseUrl}/api/v1/campaigns/add`, body, {
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/campaigns/add`,
 						headers,
+						body,
+						json: true,
 					});
-					returnData.push({ json: response.data });
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'pauseCampaign') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/campaigns/pause`,
-						{ campaignId },
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/campaigns/pause`,
+						headers,
+						body: { campaignId },
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'getCampaignStatus') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
-					const response = await axios.get(
-						`${credentials.baseUrl}/api/v1/campaigns/status?campaignId=${campaignId}`,
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+					const response = await this.helpers.request({
+						method: 'GET',
+						url: `${credentials.baseUrl}/api/v1/campaigns/status?campaignId=${campaignId}`,
+						headers,
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'add') {
@@ -914,10 +930,14 @@ export class ReachInbox implements INodeType {
 						newCoreVariables: newCoreVariables || [],
 						duplicates: [],
 					};
-					const response = await axios.post(`${credentials.baseUrl}/api/v1/leads/n8n/add`, body, {
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/leads/n8n/add`,
 						headers,
+						body,
+						json: true,
 					});
-					returnData.push({ json: response.data });
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'update') {
@@ -930,12 +950,14 @@ export class ReachInbox implements INodeType {
 					const body: any = { campaignId, leadId, attributes };
 					if (email) body.email = email;
 					if (leadStatus) body.leadStatus = leadStatus;
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/leads/n8n/update`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/leads/n8n/update`,
+						headers,
 						body,
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'delete') {
@@ -946,12 +968,14 @@ export class ReachInbox implements INodeType {
 					const leadStatus = this.getNodeParameter('leadStatus', i) as string;
 
 					const body = { campaignId, leadIds, contains, exclude, leadStatus, status: leadStatus };
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/leads/n8n/delete`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/leads/n8n/delete`,
+						headers,
 						body,
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'changeLeadsState') {
@@ -974,12 +998,14 @@ export class ReachInbox implements INodeType {
 					if (leadStatus) body.leadStatus = leadStatus;
 					if (contains) body.contains = contains;
 
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/leads/change-state`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/leads/change-state`,
+						headers,
 						body,
-						{ headers },
-					);
-					returnData.push({ json: response.data });
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'addLeadToList') {
@@ -996,14 +1022,14 @@ export class ReachInbox implements INodeType {
 						newCoreVariables: newCoreVariables || [],
 						duplicates: [],
 					};
-					const response = await axios.post(
-						`${credentials.baseUrl}/api/v1/lead-list/add-leads`,
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/lead-list/add-leads`,
+						headers,
 						body,
-						{
-							headers,
-						},
-					);
-					returnData.push({ json: response.data });
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'removeLeadFromList') {
@@ -1016,14 +1042,14 @@ export class ReachInbox implements INodeType {
 						leadIds,
 						excludeIds: typeof excludeIds === 'string' ? JSON.parse(excludeIds) : excludeIds,
 					};
-					const response = await axios.delete(
-						`${credentials.baseUrl}/api/v1/lead-list/delete-leads`,
-						{
-							headers,
-							data: body,
-						},
-					);
-					returnData.push({ json: response.data });
+					const response = await this.helpers.request({
+						method: 'DELETE',
+						url: `${credentials.baseUrl}/api/v1/lead-list/delete-leads`,
+						headers,
+						body,
+						json: true,
+					});
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'addToBlocklist') {
@@ -1039,10 +1065,14 @@ export class ReachInbox implements INodeType {
 						repliesKeywords:
 							typeof repliesKeywords === 'string' ? JSON.parse(repliesKeywords) : repliesKeywords,
 					};
-					const response = await axios.post(`${credentials.baseUrl}/api/v1/blocklist/add`, body, {
+					const response = await this.helpers.request({
+						method: 'POST',
+						url: `${credentials.baseUrl}/api/v1/blocklist/add`,
 						headers,
+						body,
+						json: true,
 					});
-					returnData.push({ json: response.data });
+					returnData.push({ json: response });
 				}
 
 				if (operation === 'removeFromBlocklist') {
@@ -1050,11 +1080,14 @@ export class ReachInbox implements INodeType {
 					const body = {
 						ids: typeof ids === 'string' ? JSON.parse(ids) : ids,
 					};
-					const response = await axios.delete(`${credentials.baseUrl}/api/v1/blocklist/keyword`, {
+					const response = await this.helpers.request({
+						method: 'DELETE',
+						url: `${credentials.baseUrl}/api/v1/blocklist/keyword`,
 						headers,
-						data: body,
+						body,
+						json: true,
 					});
-					returnData.push({ json: response.data });
+					returnData.push({ json: response });
 				}
 			} catch (error: any) {
 				returnData.push({
