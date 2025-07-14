@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-reachinbox",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Custom Node for ReachInbox",
   "keywords": [
     "n8n-community-node-package"
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dsouzaalan/n8n-reachinbox.git"
+    "url": "git+https://github.com/dsouzaalan/n8n-reachinbox.git"
   },
   "main": "index.js",
   "scripts": {
