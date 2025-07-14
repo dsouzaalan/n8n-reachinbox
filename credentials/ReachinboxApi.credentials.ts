@@ -1,4 +1,4 @@
-import { ICredentialType, INodeProperties } from 'n8n-workflow';
+import { IAuthenticateGeneric, ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class ReachinboxApi implements ICredentialType {
 	name = 'reachInboxApi';
@@ -21,4 +21,24 @@ export class ReachinboxApi implements ICredentialType {
 			default: 'https://api.reachinbox.ai',
 		},
 	];
+
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			headers: {
+				Authorization: '=Bearer {{$credentials.apiKey}}',
+			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: '={{$credentials.baseUrl}}',
+			url: '/api/v1/user/verify-key',	
+			method: 'GET',
+			headers: {
+				Authorization: 'Bearer {{$credentials.apiKey}}',
+			},
+		},
+	};
 }
