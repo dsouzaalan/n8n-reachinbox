@@ -1,0 +1,102 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deployment to N8N
+    runs-on: staging
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up SSH keys for deployment
+      - name: Set up SSH keys
+        env:
+          N8N_HOST_IP: ${{ secrets.N8N_HOST_IP }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.N8N_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $N8N_HOST_IP >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+      # Step 3: Run deployment script via SSH
+      - name: Deploy Application
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.N8N_HOST_IP }}
+          username: ${{ secrets.N8N_SSH_USERNAME }}
+          key: ${{ secrets.N8N_SSH_PRIVATE_KEY }}
+          script: |
+            cd /workspace/n8n-reachinbox
+            git pull origin main
+            npm i 
+            npm run build
+            cd /root/n8n
+            docker-compose restart 
+      # Step 4: Slack Notification on Success
+      - name: Notify Slack on Success
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data \
+          '{
+            "text": "✅ *Deployment Successful*",
+            "attachments": [
+              {
+                "fallback": "Deployment successful for commit ${{ github.sha }}",
+                "color": "good",
+                "title": "Deployment Successful",
+                "text": "*Repository*: ${{ github.repository }}\n*Commit*: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Deployed by*: ${{ github.actor }}",
+                "fields": [
+                  {
+                    "title": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Environment",
+                    "value": "${{ secrets.prod_DEPLOY_ENV }}",
+                    "short": true
+                  }
+                ],
+                "footer": "GitHub Actions",
+                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png"
+              }
+            ]
+          }' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+      # Step 5: Slack Notification on Failure
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data \
+          '{
+            "text": "❌ *Deployment Failed*",
+            "attachments": [
+              {
+                "fallback": "Deployment failed for commit ${{ github.sha }}",
+                "color": "danger",
+                "title": "Deployment Failed",
+                "text": "*Repository*: ${{ github.repository }}\n*Commit*: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Deployed by*: ${{ github.actor }}",
+                "fields": [
+                  {
+                    "title": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Environment",
+                    "value": "${{ secrets.prod_DEPLOY_ENV }}",
+                    "short": true
+                  }
+                ],
+                "footer": "GitHub Actions",
+                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png"
+              }
+            ]
+          }' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
