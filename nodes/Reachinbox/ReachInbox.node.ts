@@ -146,6 +146,7 @@ export class ReachInbox implements INodeType {
 							'changeLeadsState',
 							'updateCampaignDetails',
 							'addSequences',
+							'addEmailToCampaign',
 						],
 					},
 				},
@@ -632,6 +633,25 @@ export class ReachInbox implements INodeType {
 				default: '[]',
 				description: 'Array of keyword IDs to remove from blocklist',
 			},
+			{
+				displayName: 'Blocklist Table',
+				name: 'table',
+				type: 'options',
+				options: [
+					{ name: 'Email', value: 'email' },
+					{ name: 'Domain', value: 'domain' },
+					{ name: 'Keyword', value: 'keyword' },
+					{ name: 'Replies Keyword', value: 'replies-keyword' },
+				],
+				required: true,
+				default: 'keyword',
+				displayOptions: {
+					show: {
+						operation: ['removeFromBlocklist'],
+					},
+				},
+				description: 'Type of blocklist to remove from',
+			},
 
 			// For Pause/Resume Leads
 			{
@@ -885,7 +905,7 @@ export class ReachInbox implements INodeType {
 
 					const response = await this.helpers.request({
 						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/add`,
+						url: `${credentials.baseUrl}/api/v1/campaigns/add-sequence`,
 						headers,
 						body,
 						json: true,
@@ -1034,8 +1054,19 @@ export class ReachInbox implements INodeType {
 
 				if (operation === 'removeLeadFromList') {
 					const leadsListId = this.getNodeParameter('leadsListId', i) as string;
-					const leadIds = this.getNodeParameter('leadIds', i) as string;
+					let leadIds = this.getNodeParameter('leadIds', i);
 					const excludeIds = this.getNodeParameter('excludeIds', i);
+
+					// Handle leadIds as array or string 'ALL'
+					if (typeof leadIds === 'string') {
+						if (leadIds.trim() !== 'ALL') {
+							try {
+								leadIds = JSON.parse(leadIds);
+							} catch {
+								// fallback: keep as string if not a valid array
+							}
+						}
+					}
 
 					const body = {
 						leadsListId,
@@ -1077,12 +1108,13 @@ export class ReachInbox implements INodeType {
 
 				if (operation === 'removeFromBlocklist') {
 					const ids = this.getNodeParameter('ids', i);
+					const table = this.getNodeParameter('table', i) as string;
 					const body = {
 						ids: typeof ids === 'string' ? JSON.parse(ids) : ids,
 					};
 					const response = await this.helpers.request({
 						method: 'DELETE',
-						url: `${credentials.baseUrl}/api/v1/blocklist/keyword`,
+						url: `${credentials.baseUrl}/api/v1/blocklist/${table}`,
 						headers,
 						body,
 						json: true,
