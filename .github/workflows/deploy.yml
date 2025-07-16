@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     name: Deployment to N8N
-    runs-on: prodution
+    runs-on: production
     steps:
       # Step 1: Checkout the code
       - name: Checkout Code
