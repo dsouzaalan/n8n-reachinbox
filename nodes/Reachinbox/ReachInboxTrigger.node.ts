@@ -70,7 +70,7 @@ export class ReachInboxTrigger implements INodeType {
 				const baseUrl = credentials.baseUrl;
 				const apiKey = credentials.apiKey;
 
-				const responseRaw = await this.helpers.request({
+				const responseRaw = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 					method: 'GET',
 					url: `${baseUrl}/api/v1/webhook/event`,
 					headers: {
@@ -113,7 +113,7 @@ export class ReachInboxTrigger implements INodeType {
 				const baseUrl = credentials.baseUrl;
 				const apiKey = credentials.apiKey;
 
-				const responseRaw = await this.helpers.request({
+				const responseRaw = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 					method: 'GET',
 					url: `${baseUrl}/api/v1/campaigns/all`,
 					headers: {
@@ -169,7 +169,7 @@ export class ReachInboxTrigger implements INodeType {
 					const selectedEvent = this.getNodeParameter('event') as string;
 					const campaignId = this.getNodeParameter('campaignId') as string;
 
-					const response = await this.helpers.request({
+					const response = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 						method: 'GET',
 						url: `${baseUrl}/api/v1/webhook/list-all`,
 						headers: {
@@ -179,7 +179,7 @@ export class ReachInboxTrigger implements INodeType {
 					});
 
 					if (!response || !Array.isArray(response.rows)) {
-						console.error('Unexpected response format:', response);
+						this.logger.error('Unexpected response format:', response);
 						return false;
 					}
 
@@ -191,7 +191,7 @@ export class ReachInboxTrigger implements INodeType {
 							hook.integrationType === 'N8N',
 					);
 				} catch (error) {
-					console.error('Error checking webhook existence:', error);
+					this.logger.error('Error checking webhook existence:', error);
 					return false;
 				}
 			},
@@ -205,7 +205,7 @@ export class ReachInboxTrigger implements INodeType {
 					const selectedEvent = this.getNodeParameter('event') as string;
 					const campaignId = this.getNodeParameter('campaignId') as string;
 
-					const response = await this.helpers.request({
+					const response = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 						method: 'POST',
 						url: `${baseUrl}/api/v1/webhook/subscribe/n8n`,
 						headers: {
@@ -232,7 +232,7 @@ export class ReachInboxTrigger implements INodeType {
 						'Failed to create webhook: Unexpected response',
 					);
 				} catch (error) {
-					console.error('Error creating webhook:', error);
+					this.logger.error('Error creating webhook:', error);
 					throw error;
 				}
 			},
@@ -246,7 +246,7 @@ export class ReachInboxTrigger implements INodeType {
 					const selectedEvent = this.getNodeParameter('event') as string;
 					const campaignId = this.getNodeParameter('campaignId') as string;
 
-					const response = await this.helpers.request({
+					const response = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 						method: 'DELETE',
 						url: `${baseUrl}/api/v1/webhook/unsubscribe`,
 						headers: {
@@ -272,7 +272,7 @@ export class ReachInboxTrigger implements INodeType {
 						'Failed to delete webhook: Unexpected response',
 					);
 				} catch (error) {
-					console.error('Error deleting webhook:', error);
+					this.logger.error('Error deleting webhook:', error);
 					throw error;
 				}
 			},

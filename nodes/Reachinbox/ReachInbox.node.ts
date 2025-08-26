@@ -757,14 +757,22 @@ export class ReachInbox implements INodeType {
 			try {
 				if (operation === 'startCampaign') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/start`,
-						headers,
-						body: { campaignId },
-						json: true,
-					});
-					returnData.push({ json: response });
+
+					const body = { campaignId: Number(campaignId) };
+
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/campaigns/start`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'createCampaign') {
@@ -774,14 +782,18 @@ export class ReachInbox implements INodeType {
 						name,
 					};
 
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/create`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/campaigns/create`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'addEmailToCampaign') {
@@ -803,13 +815,17 @@ export class ReachInbox implements INodeType {
 						emails: emailList,
 					};
 
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/add-email`,
-						headers,
-						body,
-						json: true,
-					});
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/campaigns/add-email`,
+							headers,
+							body,
+							json: true,
+						},
+					);
 
 					// Format the response to match the API structure
 					const responseData = {
@@ -821,7 +837,7 @@ export class ReachInbox implements INodeType {
 						},
 					};
 
-					returnData.push({ json: responseData });
+					returnData.push({ json: responseData, pairedItem: { item: i } });
 				}
 
 				if (operation === 'updateCampaignDetails') {
@@ -882,14 +898,18 @@ export class ReachInbox implements INodeType {
 						}
 					}
 
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/update-details`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/campaigns/update-details`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'addSequences') {
@@ -903,37 +923,49 @@ export class ReachInbox implements INodeType {
 						sequences,
 					};
 
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/add-sequence`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/campaigns/add-sequence`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'pauseCampaign') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/campaigns/pause`,
-						headers,
-						body: { campaignId },
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/campaigns/pause`,
+							headers,
+							body: { campaignId },
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'getCampaignStatus') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
-					const response = await this.helpers.request({
-						method: 'GET',
-						url: `${credentials.baseUrl}/api/v1/campaigns/status?campaignId=${campaignId}`,
-						headers,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'GET',
+							url: `${credentials.baseUrl}/api/v1/campaigns/status?campaignId=${campaignId}`,
+							headers,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'add') {
@@ -950,14 +982,23 @@ export class ReachInbox implements INodeType {
 						newCoreVariables: newCoreVariables || [],
 						duplicates: [],
 					};
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/leads/n8n/add`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					try {
+						const response = await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'reachInboxApi',
+							{
+								method: 'POST',
+								url: `${credentials.baseUrl}/api/v1/leads/n8n/add`,
+								headers,
+								body,
+								json: true,
+							},
+						);
+						returnData.push({ json: response, pairedItem: { item: i } });
+					} catch (error: any) {
+						// Re-throw the error to be handled by the outer catch block
+						throw error;
+					}
 				}
 
 				if (operation === 'update') {
@@ -970,14 +1011,18 @@ export class ReachInbox implements INodeType {
 					const body: any = { campaignId, leadId, attributes };
 					if (email) body.email = email;
 					if (leadStatus) body.leadStatus = leadStatus;
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/leads/n8n/update`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/leads/n8n/update`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'delete') {
@@ -988,14 +1033,18 @@ export class ReachInbox implements INodeType {
 					const leadStatus = this.getNodeParameter('leadStatus', i) as string;
 
 					const body = { campaignId, leadIds, contains, exclude, leadStatus, status: leadStatus };
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/leads/n8n/delete`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/leads/n8n/delete`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'changeLeadsState') {
@@ -1018,14 +1067,18 @@ export class ReachInbox implements INodeType {
 					if (leadStatus) body.leadStatus = leadStatus;
 					if (contains) body.contains = contains;
 
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/leads/change-state`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/leads/change-state`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'addLeadToList') {
@@ -1042,14 +1095,18 @@ export class ReachInbox implements INodeType {
 						newCoreVariables: newCoreVariables || [],
 						duplicates: [],
 					};
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/lead-list/add-leads`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/lead-list/add-leads`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'removeLeadFromList') {
@@ -1073,14 +1130,18 @@ export class ReachInbox implements INodeType {
 						leadIds,
 						excludeIds: typeof excludeIds === 'string' ? JSON.parse(excludeIds) : excludeIds,
 					};
-					const response = await this.helpers.request({
-						method: 'DELETE',
-						url: `${credentials.baseUrl}/api/v1/lead-list/delete-leads`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'DELETE',
+							url: `${credentials.baseUrl}/api/v1/lead-list/delete-leads`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'addToBlocklist') {
@@ -1096,14 +1157,18 @@ export class ReachInbox implements INodeType {
 						repliesKeywords:
 							typeof repliesKeywords === 'string' ? JSON.parse(repliesKeywords) : repliesKeywords,
 					};
-					const response = await this.helpers.request({
-						method: 'POST',
-						url: `${credentials.baseUrl}/api/v1/blocklist/add`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'POST',
+							url: `${credentials.baseUrl}/api/v1/blocklist/add`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 
 				if (operation === 'removeFromBlocklist') {
@@ -1112,14 +1177,18 @@ export class ReachInbox implements INodeType {
 					const body = {
 						ids: typeof ids === 'string' ? JSON.parse(ids) : ids,
 					};
-					const response = await this.helpers.request({
-						method: 'DELETE',
-						url: `${credentials.baseUrl}/api/v1/blocklist/${table}`,
-						headers,
-						body,
-						json: true,
-					});
-					returnData.push({ json: response });
+					const response = await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'reachInboxApi',
+						{
+							method: 'DELETE',
+							url: `${credentials.baseUrl}/api/v1/blocklist/${table}`,
+							headers,
+							body,
+							json: true,
+						},
+					);
+					returnData.push({ json: response, pairedItem: { item: i } });
 				}
 			} catch (error: any) {
 				returnData.push({
@@ -1127,6 +1196,7 @@ export class ReachInbox implements INodeType {
 						error: error.message,
 						...(error.response?.data && { details: error.response.data }),
 					},
+					pairedItem: { item: i },
 				});
 			}
 		}
