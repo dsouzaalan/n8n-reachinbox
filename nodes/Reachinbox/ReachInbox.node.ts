@@ -254,7 +254,7 @@ export class ReachInbox implements INodeType {
 
 			// Campaign - Add Sequences
 			{
-				displayName: 'Sequences (JSON)',
+				displayName: 'Sequences',
 				name: 'sequences',
 				type: 'json',
 				required: true,
