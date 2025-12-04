@@ -1013,10 +1013,18 @@ export class ReachInbox implements INodeType {
 							body.condition = condition;
 						}
 						if (additionalFields.exclude) {
-							body.exclude =
-								typeof additionalFields.exclude === 'string'
-									? JSON.parse(additionalFields.exclude)
-									: additionalFields.exclude;
+							if (typeof additionalFields.exclude === 'string') {
+								try {
+									body.exclude = JSON.parse(additionalFields.exclude);
+								} catch (error: any) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Failed to parse "exclude" JSON in additional fields: ${error.message}`,
+									);
+								}
+							} else {
+								body.exclude = additionalFields.exclude;
+							}
 						}
 					}
 
@@ -1155,17 +1163,39 @@ export class ReachInbox implements INodeType {
 
 					const body: any = { campaignId };
 					if (additionalFields.leadIds !== undefined) {
-						body.leadIds =
-							typeof additionalFields.leadIds === 'string'
-								? JSON.parse(additionalFields.leadIds)
-								: additionalFields.leadIds;
+						if (typeof additionalFields.leadIds === 'string') {
+							const trimmedLeadIds = additionalFields.leadIds.trim();
+							if (trimmedLeadIds.length > 0) {
+								try {
+									body.leadIds = JSON.parse(trimmedLeadIds);
+								} catch (error: any) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Failed to parse "leadIds" JSON in additional fields: ${error.message}`,
+									);
+								}
+							}
+						} else {
+							body.leadIds = additionalFields.leadIds;
+						}
 					}
 					if (additionalFields.contains) body.contains = additionalFields.contains;
 					if (additionalFields.exclude !== undefined) {
-						body.exclude =
-							typeof additionalFields.exclude === 'string'
-								? JSON.parse(additionalFields.exclude)
-								: additionalFields.exclude;
+						if (typeof additionalFields.exclude === 'string') {
+							const trimmedExclude = additionalFields.exclude.trim();
+							if (trimmedExclude.length > 0) {
+								try {
+									body.exclude = JSON.parse(trimmedExclude);
+								} catch (error: any) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Failed to parse "exclude" JSON in additional fields: ${error.message}`,
+									);
+								}
+							}
+						} else {
+							body.exclude = additionalFields.exclude;
+						}
 					}
 					if (additionalFields.leadStatus) {
 						body.leadStatus = additionalFields.leadStatus;
@@ -1193,17 +1223,45 @@ export class ReachInbox implements INodeType {
 					const body: any = {
 						campaignId,
 						updatedStatus,
-						leadsIds: additionalFields.leadsIds
-							? typeof additionalFields.leadsIds === 'string'
-								? JSON.parse(additionalFields.leadsIds)
-								: additionalFields.leadsIds
-							: [],
-						excludeLeadsIds: additionalFields.excludeLeadsIds
-							? typeof additionalFields.excludeLeadsIds === 'string'
-								? JSON.parse(additionalFields.excludeLeadsIds)
-								: additionalFields.excludeLeadsIds
-							: [],
+						leadsIds: [],
+						excludeLeadsIds: [],
 					};
+
+					if (additionalFields.leadsIds) {
+						if (typeof additionalFields.leadsIds === 'string') {
+							const trimmedLeadsIds = additionalFields.leadsIds.trim();
+							if (trimmedLeadsIds.length > 0) {
+								try {
+									body.leadsIds = JSON.parse(trimmedLeadsIds);
+								} catch (error: any) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Failed to parse "leadsIds" JSON in additional fields: ${error.message}`,
+									);
+								}
+							}
+						} else {
+							body.leadsIds = additionalFields.leadsIds;
+						}
+					}
+
+					if (additionalFields.excludeLeadsIds) {
+						if (typeof additionalFields.excludeLeadsIds === 'string') {
+							const trimmedExcludeLeadsIds = additionalFields.excludeLeadsIds.trim();
+							if (trimmedExcludeLeadsIds.length > 0) {
+								try {
+									body.excludeLeadsIds = JSON.parse(trimmedExcludeLeadsIds);
+								} catch (error: any) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Failed to parse "excludeLeadsIds" JSON in additional fields: ${error.message}`,
+									);
+								}
+							}
+						} else {
+							body.excludeLeadsIds = additionalFields.excludeLeadsIds;
+						}
+					}
 					if (additionalFields.status) body.status = additionalFields.status;
 					if (additionalFields.leadStatus) body.leadStatus = additionalFields.leadStatus;
 					if (additionalFields.contains) body.contains = additionalFields.contains;
@@ -1274,10 +1332,21 @@ export class ReachInbox implements INodeType {
 						leadIds,
 					};
 					if (additionalFields.excludeIds !== undefined) {
-						body.excludeIds =
-							typeof additionalFields.excludeIds === 'string'
-								? JSON.parse(additionalFields.excludeIds)
-								: additionalFields.excludeIds;
+						if (typeof additionalFields.excludeIds === 'string') {
+							const trimmedExcludeIds = additionalFields.excludeIds.trim();
+							if (trimmedExcludeIds.length > 0) {
+								try {
+									body.excludeIds = JSON.parse(trimmedExcludeIds);
+								} catch (error: any) {
+									throw new NodeOperationError(
+										this.getNode(),
+										`Failed to parse "excludeIds" JSON in additional fields: ${error.message}`,
+									);
+								}
+							}
+						} else {
+							body.excludeIds = additionalFields.excludeIds;
+						}
 					}
 					const response = await this.helpers.httpRequestWithAuthentication.call(
 						this,
@@ -1297,29 +1366,55 @@ export class ReachInbox implements INodeType {
 					const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;
 
 					const body: any = {};
-					if (additionalFields.emails !== undefined) {
-						body.emails =
-							typeof additionalFields.emails === 'string'
-								? JSON.parse(additionalFields.emails)
-								: additionalFields.emails;
+
+					const parseArrayField = (value: unknown, fieldName: string) => {
+						if (typeof value === 'string') {
+							const trimmed = value.trim();
+							if (!trimmed) return undefined;
+							try {
+								const parsed = JSON.parse(trimmed);
+								return Array.isArray(parsed) ? parsed : undefined;
+							} catch (error: any) {
+								throw new NodeOperationError(
+									this.getNode(),
+									`Failed to parse "${fieldName}" JSON in additional fields: ${error.message}`,
+								);
+							}
+						}
+						if (Array.isArray(value)) {
+							return value;
+						}
+						return undefined;
+					};
+
+					const emails = parseArrayField(additionalFields.emails, 'emails');
+					const domains = parseArrayField(additionalFields.domains, 'domains');
+					const keywords = parseArrayField(additionalFields.keywords, 'keywords');
+					const repliesKeywords = parseArrayField(additionalFields.repliesKeywords, 'repliesKeywords');
+
+					if (emails && emails.length > 0) {
+						body.emails = emails;
 					}
-					if (additionalFields.domains !== undefined) {
-						body.domains =
-							typeof additionalFields.domains === 'string'
-								? JSON.parse(additionalFields.domains)
-								: additionalFields.domains;
+					if (domains && domains.length > 0) {
+						body.domains = domains;
 					}
-					if (additionalFields.keywords !== undefined) {
-						body.keywords =
-							typeof additionalFields.keywords === 'string'
-								? JSON.parse(additionalFields.keywords)
-								: additionalFields.keywords;
+					if (keywords && keywords.length > 0) {
+						body.keywords = keywords;
 					}
-					if (additionalFields.repliesKeywords !== undefined) {
-						body.repliesKeywords =
-							typeof additionalFields.repliesKeywords === 'string'
-								? JSON.parse(additionalFields.repliesKeywords)
-								: additionalFields.repliesKeywords;
+					if (repliesKeywords && repliesKeywords.length > 0) {
+						body.repliesKeywords = repliesKeywords;
+					}
+
+					if (
+						!body.emails &&
+						!body.domains &&
+						!body.keywords &&
+						!body.repliesKeywords
+					) {
+						throw new NodeOperationError(
+							this.getNode(),
+							'At least one blocklist type must be provided: emails, domains, keywords, or repliesKeywords.',
+						);
 					}
 					const response = await this.helpers.httpRequestWithAuthentication.call(
 						this,
