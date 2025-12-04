@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-reachinbox",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Custom Node for ReachInbox",
   "keywords": [
     "n8n-community-node-package"
