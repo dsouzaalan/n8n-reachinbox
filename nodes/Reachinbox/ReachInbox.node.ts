@@ -129,7 +129,7 @@ export class ReachInbox implements INodeType {
 						action: 'Update a specific lead data',
 					},
 					{
-						name: 'Delete a Lead from a Campaign',
+						name: 'Delete a Lead From a Campaign',
 						value: 'delete',
 						action: 'Delete a lead from a campaign',
 					},
@@ -158,7 +158,7 @@ export class ReachInbox implements INodeType {
 						action: 'Add a lead to a leads list',
 					},
 					{
-						name: 'Remove a Lead from a Leads List',
+						name: 'Remove a Lead From a Leads List',
 						value: 'removeLeadFromList',
 						action: 'Remove a lead from a leads list',
 					},
@@ -182,7 +182,7 @@ export class ReachInbox implements INodeType {
 						action: 'Add to blocklist',
 					},
 					{
-						name: 'Remove Emails, Domains or Keywords from the Blocklist',
+						name: 'Remove Emails, Domains or Keywords From the Blocklist',
 						value: 'removeFromBlocklist',
 						action: 'Remove from blocklist',
 					},
@@ -278,49 +278,49 @@ export class ReachInbox implements INodeType {
 						name: 'aiReplies',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to enable AI replies.',
+						description: 'Whether to enable AI replies',
 					},
 					{
 						displayName: 'Enable Blockquote',
 						name: 'blockquote',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to enable blockquote.',
+						description: 'Whether to enable blockquote',
 					},
 					{
 						displayName: 'Enable Global Unsubscribe',
 						name: 'globalUnsubscribe',
 						type: 'boolean',
 						default: true,
-						description: 'Whether to enable global unsubscribe.',
+						description: 'Whether to enable global unsubscribe',
 					},
 					{
 						displayName: 'Enable Link Tracking',
 						name: 'linkTracking',
 						type: 'boolean',
 						default: true,
-						description: 'Whether to enable link tracking.',
+						description: 'Whether to enable link tracking',
 					},
 					{
 						displayName: 'Enable Tracking',
 						name: 'tracking',
 						type: 'boolean',
 						default: true,
-						description: 'Whether to enable tracking.',
+						description: 'Whether to enable tracking',
 					},
 					{
 						displayName: 'Prioritize New Leads in the Campaign',
 						name: 'prioritizeNewLeads',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to prioritize new leads in the campaign.',
+						description: 'Whether to prioritize new leads in the campaign',
 					},
 					{
 						displayName: 'Stop the Campaign on Reply',
 						name: 'stopOnReply',
 						type: 'boolean',
 						default: false,
-						description: 'Whether to stop the campaign when a lead replies.',
+						description: 'Whether to stop the campaign when a lead replies',
 					},
 					{
 						displayName: 'The Daily Limit for the Campaign',
@@ -345,14 +345,14 @@ export class ReachInbox implements INodeType {
 						name: 'accountsToUse',
 						type: 'string',
 						default: 'ALL',
-						description: 'Comma-separated emails or "ALL" to use all accounts.',
+						description: 'Comma-separated emails or "ALL" to use all accounts',
 					},
 					{
 						displayName: 'The Slack Webhook URL for AI Replies Notifications',
 						name: 'aiRepliesSlackWebhook',
 						type: 'string',
 						default: '',
-						description: 'Slack webhook URL for AI replies notifications.',
+						description: 'Slack webhook URL for AI replies notifications',
 						displayOptions: {
 							show: {
 								aiReplies: [true],
@@ -386,21 +386,21 @@ export class ReachInbox implements INodeType {
 						name: 'search',
 						type: 'string',
 						default: '',
-						description: 'Search term to filter accounts by email.',
+						description: 'Search term to filter accounts by email',
 					},
 					{
 						displayName: 'Warmup Health Score',
 						name: 'warmupHealthScore',
 						type: 'number',
 						default: 0,
-						description: 'Minimum warmup health score for accounts.',
+						description: 'Minimum warmup health score for accounts',
 					},
 					{
 						displayName: 'Utilization Percentage',
 						name: 'utilization',
 						type: 'number',
 						default: 100,
-						description: 'Maximum utilization percentage for accounts.',
+						description: 'Maximum utilization percentage for accounts',
 					},
 				],
 			},
@@ -528,7 +528,6 @@ export class ReachInbox implements INodeType {
 						description: 'The status of the lead',
 					},
 				],
-				description: 'Additional lead settings and options',
 			},
 
 			// Lead - Delete from Campaign
@@ -573,7 +572,7 @@ export class ReachInbox implements INodeType {
 						description: 'Filter leads containing specific text',
 					},
 					{
-						displayName: 'The IDs of the Leads to Exclude from the Deletion',
+						displayName: 'The IDs of the Leads to Exclude From the Deletion',
 						name: 'exclude',
 						type: 'json',
 						default: '[]',
@@ -587,7 +586,6 @@ export class ReachInbox implements INodeType {
 						description: 'Filter leads by lead status (e.g., "Interested")',
 					},
 				],
-				description: 'Additional lead settings and options',
 			},
 
 			// Lead - Pause/Resume
@@ -619,12 +617,10 @@ export class ReachInbox implements INodeType {
 					{
 						name: 'Pause Leads',
 						value: 'PAUSED',
-						description: 'Pause leads',
 					},
 					{
 						name: 'Resume Leads',
 						value: 'IN_PROCESS',
-						description: 'Resume leads',
 					},
 				],
 				default: 'PAUSED',
@@ -648,35 +644,35 @@ export class ReachInbox implements INodeType {
 						name: 'contains',
 						type: 'string',
 						default: '',
-						description: 'Filter leads containing specific text.',
+						description: 'Filter leads containing specific text',
 					},
 					{
 						displayName: 'Exclude Lead IDs (Array)',
 						name: 'excludeLeadsIds',
 						type: 'json',
 						default: '[]',
-						description: 'Lead IDs to exclude from the update.',
+						description: 'Lead IDs to exclude from the update',
 					},
 					{
 						displayName: 'Lead IDs (Array)',
 						name: 'leadsIds',
 						type: 'json',
 						default: '[]',
-						description: 'Specific lead IDs to update (empty for all).',
+						description: 'Specific lead IDs to update (empty for all)',
 					},
 					{
 						displayName: 'Lead Status Filter',
 						name: 'leadStatus',
 						type: 'string',
 						default: '',
-						description: 'Filter leads by lead status (e.g., "Interested").',
+						description: 'Filter leads by lead status (e.g., "Interested")',
 					},
 					{
 						displayName: 'Status Filter',
 						name: 'status',
 						type: 'string',
 						default: '',
-						description: 'Filter leads by status (e.g., "emails_opened").',
+						description: 'Filter leads by status (e.g., "emails_opened")',
 					},
 				],
 			},
@@ -694,10 +690,9 @@ export class ReachInbox implements INodeType {
 						operation: ['addLeadToList'],
 					},
 				},
-				description: 'The ID of the leads list',
 			},
 			{
-				displayName: 'The Leads to Add to the Leads List',
+				displayName: 'Leads (JSON)',
 				name: 'leads',
 				type: 'json',
 				required: true,
@@ -708,11 +703,9 @@ export class ReachInbox implements INodeType {
 					},
 				},
 				default: '',
-				description:
-					'Array of lead objects. Example: [{"email": "john@example.com", "firstName": "John"}].',
 			},
 			{
-				displayName: 'Additional Leads List Settings and Options',
+				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
 				placeholder: 'Add Field',
@@ -725,19 +718,18 @@ export class ReachInbox implements INodeType {
 				},
 				options: [
 					{
-						displayName: 'The New Core Variables to Add to the Leads',
+						displayName: 'New Core Variables (Array)',
 						name: 'newCoreVariables',
 						type: 'json',
 						default: '',
-						description: 'The new core variables to add to the leads',
+						description: 'Array of new variables like ["firstName", "lastName"]',
 					},
 				],
-				description: 'Additional leads list settings and options',
 			},
 
 			// Leads List - Remove Lead
 			{
-				displayName: 'The ID of the Leads List',
+				displayName: 'Leads List ID',
 				name: 'leadsListId',
 				type: 'string',
 				required: true,
@@ -748,10 +740,9 @@ export class ReachInbox implements INodeType {
 						operation: ['removeLeadFromList'],
 					},
 				},
-				description: 'The ID of the leads list',
 			},
 			{
-				displayName: 'Additional Leads List Settings and Options',
+				displayName: 'Additional Fields',
 				name: 'additionalFields',
 				type: 'collection',
 				placeholder: 'Add Field',
@@ -764,21 +755,20 @@ export class ReachInbox implements INodeType {
 				},
 				options: [
 					{
-						displayName: 'The IDs of the Leads to Remove from the Leads List',
+						displayName: 'Lead IDs',
 						name: 'leadIds',
 						type: 'string',
 						default: 'ALL',
 						description: 'Comma-separated list of lead IDs or "ALL" to remove all leads',
 					},
 					{
-						displayName: 'The IDs of the Leads to Exclude from the Removal',
+						displayName: 'Exclude IDs (Array)',
 						name: 'excludeIds',
 						type: 'json',
 						default: '[]',
 						description: 'Array of lead IDs to exclude from deletion',
 					},
 				],
-				description: 'Additional leads list settings and options',
 			},
 
 			// Blocklist - Add
@@ -824,12 +814,11 @@ export class ReachInbox implements INodeType {
 						description: 'The replies keywords to add to the blocklist',
 					},
 				],
-				description: 'Additional blocklist settings and options',
 			},
 
 			// Blocklist - Remove
 			{
-				displayName: 'The Type of Blocklist to Remove from',
+				displayName: 'The Type of Blocklist to Remove From',
 				name: 'table',
 				type: 'options',
 				required: true,
@@ -837,7 +826,11 @@ export class ReachInbox implements INodeType {
 					{ name: 'Email', value: 'email', description: 'Email blocklist' },
 					{ name: 'Domain', value: 'domain', description: 'Domain blocklist' },
 					{ name: 'Keyword', value: 'keyword', description: 'Keyword blocklist' },
-					{ name: 'Replies Keyword', value: 'replies-keyword', description: 'Replies keyword blocklist' },
+					{
+						name: 'Replies Keyword',
+						value: 'replies-keyword',
+						description: 'Replies keyword blocklist',
+					},
 				],
 				default: 'keyword',
 				displayOptions: {
@@ -849,7 +842,7 @@ export class ReachInbox implements INodeType {
 				description: 'Type of blocklist to remove from',
 			},
 			{
-				displayName: 'The IDs of the Keywords to Remove from the Blocklist',
+				displayName: 'The IDs of the Keywords to Remove From the Blocklist',
 				name: 'ids',
 				type: 'json',
 				required: true,
@@ -1404,7 +1397,10 @@ export class ReachInbox implements INodeType {
 					const emails = parseArrayField(additionalFields.emails, 'emails');
 					const domains = parseArrayField(additionalFields.domains, 'domains');
 					const keywords = parseArrayField(additionalFields.keywords, 'keywords');
-					const repliesKeywords = parseArrayField(additionalFields.repliesKeywords, 'repliesKeywords');
+					const repliesKeywords = parseArrayField(
+						additionalFields.repliesKeywords,
+						'repliesKeywords',
+					);
 
 					if (emails && emails.length > 0) {
 						body.emails = emails;
@@ -1419,12 +1415,7 @@ export class ReachInbox implements INodeType {
 						body.repliesKeywords = repliesKeywords;
 					}
 
-					if (
-						!body.emails &&
-						!body.domains &&
-						!body.keywords &&
-						!body.repliesKeywords
-					) {
+					if (!body.emails && !body.domains && !body.keywords && !body.repliesKeywords) {
 						throw new NodeOperationError(
 							this.getNode(),
 							'At least one blocklist type must be provided: emails, domains, keywords, or repliesKeywords.',
@@ -1477,4 +1468,3 @@ export class ReachInbox implements INodeType {
 		return [returnData];
 	}
 }
-
