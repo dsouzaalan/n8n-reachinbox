@@ -19,8 +19,8 @@ npm install n8n-nodes-reachinbox
 Or for local development:
 
 ```bash
-git clone https://github.com/<your-org>/n8n-nodes-reachinbox.git
-cd n8n-nodes-reachinbox
+git clone https://github.com/dsouzaalan/n8n-reachinbox.git
+cd n8n-reachinbox
 npm install
 npm run build
 npm link
