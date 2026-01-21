@@ -1,8 +1,6 @@
 import {
 	IExecuteFunctions,
 	INodeExecutionData,
-	INodeInputConfiguration,
-	INodeOutputConfiguration,
 	INodeType,
 	INodeTypeDescription,
 	NodeConnectionType,
@@ -20,8 +18,8 @@ export class ReachInbox implements INodeType {
 		defaults: {
 			name: 'ReachInbox',
 		},
-		inputs: ['main'] as (NodeConnectionType | INodeInputConfiguration)[],
-		outputs: ['main'] as (NodeConnectionType | INodeOutputConfiguration)[],
+		inputs: ['main'] as (NodeConnectionType.Main)[],
+		outputs: ['main'] as (NodeConnectionType.Main)[],
 		credentials: [
 			{
 				name: 'reachInboxApi',
