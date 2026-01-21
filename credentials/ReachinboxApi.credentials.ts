@@ -34,11 +34,8 @@ export class ReachinboxApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials.baseUrl}}',
-			url: '/api/v1/user/verify-key',	
-			method: 'GET',
-			headers: {
-				Authorization: 'Bearer {{$credentials.apiKey}}',
-			},
+			url: '/api/v1/user/verify-key',
+			method: 'GET'
 		},
 	};
 }

@@ -1,7 +1,6 @@
 import {
 	IHookFunctions,
 	ILoadOptionsFunctions,
-	INodeOutputConfiguration,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
@@ -22,7 +21,7 @@ export class ReachInboxTrigger implements INodeType {
 			name: 'ReachInbox Trigger',
 		},
 		inputs: [],
-		outputs: ['main'] as (NodeConnectionType | INodeOutputConfiguration)[],
+		outputs: ['main'] as (NodeConnectionType.Main)[],
 		credentials: [
 			{
 				name: 'reachInboxApi',
@@ -68,14 +67,10 @@ export class ReachInboxTrigger implements INodeType {
 			async getReachInboxEvents(this: ILoadOptionsFunctions) {
 				const credentials = await this.getCredentials('reachInboxApi');
 				const baseUrl = credentials.baseUrl;
-				const apiKey = credentials.apiKey;
 
 				const responseRaw = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 					method: 'GET',
 					url: `${baseUrl}/api/v1/webhook/event`,
-					headers: {
-						Authorization: `Bearer ${apiKey}`,
-					},
 				});
 
 				let response: any = responseRaw;
@@ -111,14 +106,10 @@ export class ReachInboxTrigger implements INodeType {
 			async getReachInboxCampaigns(this: ILoadOptionsFunctions) {
 				const credentials = await this.getCredentials('reachInboxApi');
 				const baseUrl = credentials.baseUrl;
-				const apiKey = credentials.apiKey;
 
 				const responseRaw = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 					method: 'GET',
 					url: `${baseUrl}/api/v1/campaigns/all`,
-					headers: {
-						Authorization: `Bearer ${apiKey}`,
-					},
 					json: true,
 				});
 
@@ -179,7 +170,6 @@ export class ReachInboxTrigger implements INodeType {
 					});
 
 					if (!response || !Array.isArray(response.rows)) {
-						this.logger.error('Unexpected response format:', response);
 						return false;
 					}
 
@@ -191,7 +181,6 @@ export class ReachInboxTrigger implements INodeType {
 							hook.integrationType === 'N8N',
 					);
 				} catch (error) {
-					this.logger.error('Error checking webhook existence:', error);
 					return false;
 				}
 			},
@@ -200,7 +189,6 @@ export class ReachInboxTrigger implements INodeType {
 				try {
 					const credentials = await this.getCredentials('reachInboxApi');
 					const baseUrl = credentials.baseUrl;
-					const apiKey = credentials.apiKey;
 					const webhookUrl = this.getNodeWebhookUrl('default');
 					const selectedEvent = this.getNodeParameter('event') as string;
 					const campaignId = this.getNodeParameter('campaignId') as string;
@@ -208,10 +196,6 @@ export class ReachInboxTrigger implements INodeType {
 					const response = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 						method: 'POST',
 						url: `${baseUrl}/api/v1/webhook/subscribe/n8n`,
-						headers: {
-							Authorization: `Bearer ${apiKey}`,
-							'Content-Type': 'application/json',
-						},
 						body: {
 							event: selectedEvent,
 							callbackUrl: webhookUrl,
@@ -232,7 +216,6 @@ export class ReachInboxTrigger implements INodeType {
 						'Failed to create webhook: Unexpected response',
 					);
 				} catch (error) {
-					this.logger.error('Error creating webhook:', error);
 					throw error;
 				}
 			},
@@ -241,7 +224,6 @@ export class ReachInboxTrigger implements INodeType {
 				try {
 					const credentials = await this.getCredentials('reachInboxApi');
 					const baseUrl = credentials.baseUrl;
-					const apiKey = credentials.apiKey;
 					const webhookUrl = this.getNodeWebhookUrl('default');
 					const selectedEvent = this.getNodeParameter('event') as string;
 					const campaignId = this.getNodeParameter('campaignId') as string;
@@ -249,10 +231,6 @@ export class ReachInboxTrigger implements INodeType {
 					const response = await this.helpers.httpRequestWithAuthentication.call(this, 'reachInboxApi', {
 						method: 'DELETE',
 						url: `${baseUrl}/api/v1/webhook/unsubscribe`,
-						headers: {
-							Authorization: `Bearer ${apiKey}`,
-							'Content-Type': 'application/json',
-						},
 						body: {
 							event: selectedEvent,
 							campaignId: campaignId,
@@ -272,7 +250,6 @@ export class ReachInboxTrigger implements INodeType {
 						'Failed to delete webhook: Unexpected response',
 					);
 				} catch (error) {
-					this.logger.error('Error deleting webhook:', error);
 					throw error;
 				}
 			},
