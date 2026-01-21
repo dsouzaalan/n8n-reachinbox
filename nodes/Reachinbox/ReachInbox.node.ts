@@ -1142,7 +1142,20 @@ export class ReachInbox implements INodeType {
 				if (operation === 'update') {
 					const campaignId = this.getNodeParameter('campaignId', i) as string;
 					const leadId = this.getNodeParameter('leadId', i) as string;
-					const attributes = this.getNodeParameter('attributes', i);
+					const rawAttributes = this.getNodeParameter('attributes', i);
+					let attributes;
+					if (typeof rawAttributes === 'string') {
+						try {
+							attributes = JSON.parse(rawAttributes);
+						} catch (error: any) {
+							throw new NodeOperationError(
+								this.getNode(),
+								`Failed to parse "attributes" JSON: ${error.message}`,
+							);
+						}
+					} else {
+						attributes = rawAttributes;
+					}
 					const additionalFields = this.getNodeParameter('additionalFields', i, {}) as any;
 
 					const body: any = { campaignId, leadId, attributes };
