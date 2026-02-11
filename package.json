@@ -33,8 +33,8 @@
       "dist/credentials/ReachinboxApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ReachInbox/ReachInbox.node.js",
-      "dist/nodes/ReachInbox/ReachInboxTrigger.node.js"
+      "dist/nodes/Reachinbox/ReachInbox.node.js",
+      "dist/nodes/Reachinbox/ReachInboxTrigger.node.js"
     ]
   },
   "devDependencies": {
