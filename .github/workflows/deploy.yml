@@ -5,98 +5,137 @@ on:
     branches:
       - main
 
+permissions: {}
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deployment to N8N
     runs-on: production
+    timeout-minutes: 40
     steps:
-      # Step 1: Checkout the code
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
       # Step 2: Set up SSH keys for deployment
-      - name: Set up SSH keys
+      - name: Set up SSH (key + pinned host key)
         env:
-          N8N_HOST_IP: ${{ secrets.N8N_HOST_IP }}
+          SSH_KEY: ${{ secrets.N8N_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.N8N_SSH_KNOWN_HOSTS }}
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.N8N_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $N8N_HOST_IP >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+          umask 077
+          install -d "$RUNNER_TEMP/ssh"
+          printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/ssh/known_hosts"
       # Step 3: Run deployment script via SSH
       - name: Deploy Application
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.N8N_HOST_IP }}
-          username: ${{ secrets.N8N_SSH_USERNAME }}
-          key: ${{ secrets.N8N_SSH_PRIVATE_KEY }}
-          script: |
+        timeout-minutes: 30
+        env:
+          SSH_HOST: ${{ secrets.N8N_HOST_IP }}
+          SSH_USER: ${{ secrets.N8N_SSH_USERNAME }}
+          REMOTE_SCRIPT: |
             cd /workspace/n8n-reachinbox
             git pull origin main
             npm i 
             npm run build
             cd /root/n8n
             docker-compose restart 
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$REMOTE_SCRIPT" | ssh -i "$RUNNER_TEMP/ssh/key" \
+            -o UserKnownHostsFile="$RUNNER_TEMP/ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o ConnectTimeout=10 -o ServerAliveInterval=30 -o ServerAliveCountMax=4 \
+            "$SSH_USER@$SSH_HOST" 'bash -c "$(cat)"'
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/ssh"
       # Step 4: Slack Notification on Success
       - name: Notify Slack on Success
         if: success()
+        env:
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          PROD_DEPLOY_ENV: ${{ secrets.prod_DEPLOY_ENV }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST -H 'Content-type: application/json' --data \
-          '{
-            "text": "✅ *Deployment Successful*",
-            "attachments": [
-              {
-                "fallback": "Deployment successful for commit ${{ github.sha }}",
-                "color": "good",
-                "title": "Deployment Successful",
-                "text": "*Repository*: ${{ github.repository }}\n*Commit*: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Deployed by*: ${{ github.actor }}",
-                "fields": [
-                  {
-                    "title": "Branch",
-                    "value": "${{ github.ref_name }}",
-                    "short": true
-                  },
-                  {
-                    "title": "Environment",
-                    "value": "${{ secrets.prod_DEPLOY_ENV }}",
-                    "short": true
-                  }
-                ],
-                "footer": "GitHub Actions",
-                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png"
-              }
-            ]
-          }' \
-          ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload=$(jq -n \
+            --arg sha "$SHA" \
+            --arg repo "$REPO" \
+            --arg actor "$ACTOR" \
+            --arg branch "$BRANCH" \
+            --arg prod_deploy_env "$PROD_DEPLOY_ENV" \
+            '{
+              "text": "✅ *Deployment Successful*",
+              "attachments": [
+                {
+                  "fallback": "Deployment successful for commit \($sha)",
+                  "color": "good",
+                  "title": "Deployment Successful",
+                  "text": "*Repository*: \($repo)\n*Commit*: <https://github.com/\($repo)/commit/\($sha)|\($sha)>\n*Deployed by*: \($actor)",
+                  "fields": [
+                    {
+                      "title": "Branch",
+                      "value": "\($branch)",
+                      "short": true
+                    },
+                    {
+                      "title": "Environment",
+                      "value": "\($prod_deploy_env)",
+                      "short": true
+                    }
+                  ],
+                  "footer": "GitHub Actions",
+                  "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png"
+                }
+              ]
+            }')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" \
+          "$SLACK_WEBHOOK_URL"
       # Step 5: Slack Notification on Failure
       - name: Notify Slack on Failure
         if: failure()
+        env:
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          PROD_DEPLOY_ENV: ${{ secrets.prod_DEPLOY_ENV }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST -H 'Content-type: application/json' --data \
-          '{
-            "text": "❌ *Deployment Failed*",
-            "attachments": [
-              {
-                "fallback": "Deployment failed for commit ${{ github.sha }}",
-                "color": "danger",
-                "title": "Deployment Failed",
-                "text": "*Repository*: ${{ github.repository }}\n*Commit*: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Deployed by*: ${{ github.actor }}",
-                "fields": [
-                  {
-                    "title": "Branch",
-                    "value": "${{ github.ref_name }}",
-                    "short": true
-                  },
-                  {
-                    "title": "Environment",
-                    "value": "${{ secrets.prod_DEPLOY_ENV }}",
-                    "short": true
-                  }
-                ],
-                "footer": "GitHub Actions",
-                "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png"
-              }
-            ]
-          }' \
-          ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload=$(jq -n \
+            --arg sha "$SHA" \
+            --arg repo "$REPO" \
+            --arg actor "$ACTOR" \
+            --arg branch "$BRANCH" \
+            --arg prod_deploy_env "$PROD_DEPLOY_ENV" \
+            '{
+              "text": "❌ *Deployment Failed*",
+              "attachments": [
+                {
+                  "fallback": "Deployment failed for commit \($sha)",
+                  "color": "danger",
+                  "title": "Deployment Failed",
+                  "text": "*Repository*: \($repo)\n*Commit*: <https://github.com/\($repo)/commit/\($sha)|\($sha)>\n*Deployed by*: \($actor)",
+                  "fields": [
+                    {
+                      "title": "Branch",
+                      "value": "\($branch)",
+                      "short": true
+                    },
+                    {
+                      "title": "Environment",
+                      "value": "\($prod_deploy_env)",
+                      "short": true
+                    }
+                  ],
+                  "footer": "GitHub Actions",
+                  "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png"
+                }
+              ]
+            }')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" \
+          "$SLACK_WEBHOOK_URL"
